@@ -9,3 +9,5 @@ tree while adding a catalog-ready RoboNix package boundary.
 
 The upstream remote remains the provenance reference. Model and Drafter
 checkpoints are deployment inputs and are intentionally not stored in Git.
+Vendored OpenVLA and speculative-decoding sources keep their upstream license
+terms as documented in `THIRD_PARTY_NOTICES.md`.

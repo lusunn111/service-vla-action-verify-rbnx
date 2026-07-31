@@ -1,15 +1,40 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "robonix-service-vla-action-decision"
 version = "0.1.0"
 description = "RoboNix VLA action decision service with speculative decoding"
+readme = "README.md"
+license = "MulanPSL-2.0"
+license-files = [
+  "LICENSE",
+  "THIRD_PARTY_NOTICES.md",
+  "vendor/openvla/openvla/LICENSE.OPENVLA",
+]
 requires-python = ">=3.10"
 dependencies = []
 
 [project.optional-dependencies]
+inference = [
+  "accelerate>=0.25",
+  "bitsandbytes>=0.41",
+  "draccus==0.8.0",
+  "einops>=0.7",
+  "huggingface-hub>=0.22",
+  "numpy==1.26.4",
+  "Pillow>=10",
+  "protobuf>=4.25",
+  "safetensors>=0.4",
+  "sentencepiece==0.1.99",
+  "tensorflow==2.15.0",
+  "timm==0.9.10",
+  "tokenizers==0.19.1",
+  "torch==2.2.0",
+  "torchvision==0.17.0",
+  "transformers==4.40.1",
+]
 dev = [
   "build>=1.2",
   "pytest>=8",
@@ -19,11 +44,35 @@ dev = [
 
 [tool.setuptools]
 py-modules = ["service_bootstrap"]
+packages = [
+  "vla_action_service",
+  "openvla",
+  "experiments",
+  "experiments.robot",
+  "local_transformers",
+  "prismatic",
+  "prismatic.conf",
+  "prismatic.extern",
+  "prismatic.extern.hf",
+  "prismatic.overwatch",
+  "prismatic.preprocessing",
+  "prismatic.training",
+  "prismatic.training.strategies",
+  "prismatic.util",
+  "prismatic.vla",
+  "specdecoding",
+  "specdecoding.model",
+]
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["vla_action_service*", "modules*", "scripts*", "utils*"]
-exclude = ["vendor*", "benchmarks*", "tests*"]
+[tool.setuptools.package-dir]
+openvla = "vendor/openvla/openvla"
+experiments = "vendor/openvla/experiments"
+local_transformers = "vendor/openvla/local_transformers"
+prismatic = "vendor/openvla/prismatic"
+specdecoding = "vendor/openvla/specdecoding"
+
+[tool.setuptools.package-data]
+openvla = ["LICENSE.OPENVLA"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

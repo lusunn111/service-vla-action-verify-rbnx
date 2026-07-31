@@ -32,18 +32,27 @@ and never commands robot hardware. RoboNix activation does not import PyTorch
 or allocate GPU memory; the target model and Drafter load on the first real
 request.
 
+For repository checks:
+
 ```bash
 python -m pip install -e '.[dev]'
 python -m pytest -q
 python scripts/release_audit.py
+python -m build
+python scripts/verify_distribution.py
 rbnx validate .
 rbnx build -p .
 ```
 
-The model checkpoints are deployment inputs and are not stored in Git. See
-[CAPABILITY.md](CAPABILITY.md) for the public interface and safety boundary.
-The complete research implementation and benchmark material below remain in
-this repository.
+For real inference, use Python 3.10 or 3.11 in a CUDA-compatible environment
+and install `.[inference]`. The Wheel contains the Service adapter and the
+OpenVLA/SpecVLA inference source; checkpoints remain deployment inputs and are
+not stored in Git. Point `ROBONIX_SERVICE_PYTHON` at that environment when
+RoboNix starts the Service. See [CAPABILITY.md](CAPABILITY.md) for the public
+interface, [examples/minimal-deployment/README.md](examples/minimal-deployment/README.md)
+for complete mock and real configurations, and [VALIDATION.md](VALIDATION.md)
+for the exact validation boundary. The complete research implementation and
+benchmark material below remain in this repository.
 
 <a id="performance-snapshot"></a>
 ## 📊 Performance Snapshot
@@ -140,8 +149,9 @@ Looking forward, the same interface can support additional Drafters, physical co
 <a id="validated-release"></a>
 ## 🧪 Validated Release
 
-The release was validated on an NVIDIA A100 40GB server with an existing
-OpenVLA LIBERO-Goal checkpoint and a trained compatible Drafter.
+The preserved research workflow was validated on an NVIDIA A100 40GB server
+with an existing OpenVLA LIBERO-Goal checkpoint and a trained compatible
+Drafter.
 
 | Check | Result |
 | --- | --- |
@@ -154,6 +164,12 @@ OpenVLA LIBERO-Goal checkpoint and a trained compatible Drafter.
 The bounded rollout intentionally does not claim task success or reproduce a
 paper benchmark. It proves model loading, Drafter attachment, simulator
 execution, action generation, and video export.
+
+It also does not claim that the current RoboNix Service wrapper has completed
+GPU, Atlas, or MCP deployment validation on `target-server`. Automated Service
+and distribution checks are recorded in [VALIDATION.md](VALIDATION.md); direct
+research-script versus capability-output comparison remains a pre-release
+gate.
 
 ![Validated 100-step LIBERO rollout](docs/assets/validated-rollout-preview.png)
 
@@ -208,7 +224,7 @@ rate measurement.
 | Component        | Requirement                                                                            |
 | ---------------- | -------------------------------------------------------------------------------------- |
 | Operating system | Linux recommended, especially for DeepSpeed and headless LIBERO/MuJoCo                 |
-| Python           | 3.10 or later                                                                          |
+| Python           | 3.10+ for package checks; 3.10 or 3.11 for the pinned inference dependencies          |
 | PyTorch          | 2.2.0                                                                                  |
 | CUDA             | The upstream setup was tested with CUDA 12.1; match PyTorch, CUDA, and driver versions |
 | Simulation       | LIBERO 0.1.0 and MuJoCo/EGL for evaluation                                             |
@@ -427,7 +443,7 @@ The default strategy is `modules.strategies.modeling_speculation`. The `_1`, `_1
 - [ ] Add autoregressive-versus-speculative benchmark tables and acceptance metrics.
 - [ ] Add more Drafter architectures and verification strategies.
 - [ ] Validate additional VLA model families through the same Service contract.
-- [ ] Provide a versioned RoboNix service adapter.
+- [x] Provide the versioned RoboNix Service adapter and capability contract.
 
 <a id="citation"></a>
 ## 📝 Citation

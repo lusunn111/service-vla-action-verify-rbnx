@@ -27,16 +27,26 @@ OpenVLA，以及 Drafter 候选生成、并行验证、运动感知补偿和原�
 机器人硬件。RoboNix 激活阶段不会导入 PyTorch 或占用 GPU，目标模型与 Drafter
 在第一次真实请求时延迟加载。
 
+仓库检查使用：
+
 ```bash
 python -m pip install -e '.[dev]'
 python -m pytest -q
 python scripts/release_audit.py
+python -m build
+python scripts/verify_distribution.py
 rbnx validate .
 rbnx build -p .
 ```
 
-模型检查点作为部署输入，不进入 Git。公开接口与安全边界见
-[CAPABILITY.md](CAPABILITY.md)，下文的完整研究实现和基准材料继续保留。
+真实推理应使用 Python 3.10 或 3.11，并在匹配 CUDA 的环境中安装
+`.[inference]`。Wheel（Python 二进制分发包）已经包含 Service 适配器和
+OpenVLA/SpecVLA 推理源码，模型检查点仍作为部署输入，不进入 Git。RoboNix
+启动时可用 `ROBONIX_SERVICE_PYTHON` 指向该推理环境。公开接口与安全边界见
+[CAPABILITY.md](CAPABILITY.md)，完整模拟与真实配置见
+[examples/minimal-deployment/README.md](examples/minimal-deployment/README.md)，
+准确的验证边界见 [VALIDATION.md](VALIDATION.md)。下文的完整研究实现和基准材料
+继续保留。
 
 <a id="performance-snapshot"></a>
 ## 📊 效果概览
@@ -132,6 +142,8 @@ IMAGEGEN ASSET
 <a id="validated-release"></a>
 ## 🧪 已验证版本
 
+下表对应此前完成的底层研究推理与仿真链路验证。
+
 | 验证项 | 结果 |
 | --- | --- |
 | 包结构与独立目录命令 | 6 项测试通过 |
@@ -142,6 +154,10 @@ IMAGEGEN ASSET
 
 该 rollout 主动限制为 100 步，因此不用于证明任务成功率或复现论文指标；它证明了
 目标模型加载、Drafter 挂载、仿真启动、动作生成和视频导出链路可以运行。
+
+它不代表本轮 RoboNix Service 已经在 `target-server` 完成 GPU、Atlas（能力目录）
+或 MCP（模型上下文协议）部署验收。自动化 Service 与分发包检查记录在
+[VALIDATION.md](VALIDATION.md)；研究脚本与能力输出逐项对比仍是正式发布前置条件。
 
 ![已验证的 100 步 LIBERO rollout](docs/assets/validated-rollout-preview.png)
 
@@ -169,7 +185,7 @@ python -m scripts.run --help
 | 组件 | 要求 |
 | --- | --- |
 | 操作系统 | 推荐 Linux，DeepSpeed 与无头 LIBERO/MuJoCo 评测依赖 Linux 环境 |
-| Python | 3.10 或更高版本 |
+| Python | 软件包检查支持 3.10 以上；固定版本真实推理使用 3.10 或 3.11 |
 | PyTorch | 2.2.0 |
 | CUDA | 已验证环境为 CUDA 12.1，需与 PyTorch 和驱动版本匹配 |
 | 仿真环境 | LIBERO 0.1.0、MuJoCo 与 EGL |
@@ -265,7 +281,7 @@ bash train_ds_libero_goal.sh
 - [ ] 补充自回归与推测解码的端到端基准和接受率指标。
 - [ ] 接入更多 Drafter 结构与验证策略。
 - [ ] 通过统一 Service 契约验证更多 VLA 模型系列。
-- [ ] 提供带版本号的 RoboNix 服务适配器。
+- [x] 提供带版本号的 RoboNix Service 适配器和能力契约。
 
 <a id="citation"></a>
 ## 📝 引用

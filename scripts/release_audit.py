@@ -17,7 +17,9 @@ REQUIRED = {
     "CHANGELOG.md",
     "CITATION.cff",
     "UPSTREAM_SOURCE.md",
+    "THIRD_PARTY_NOTICES.md",
     "CAPABILITY.md",
+    "VALIDATION.md",
     "package_manifest.yaml",
     "config.spec",
     "capabilities/decide.v1.toml",
@@ -25,6 +27,8 @@ REQUIRED = {
     "scripts/build.sh",
     "scripts/start.sh",
     "scripts/stop.sh",
+    "scripts/verify_distribution.py",
+    "vendor/openvla/openvla/LICENSE.OPENVLA",
 }
 EXECUTABLE = {"scripts/build.sh", "scripts/start.sh", "scripts/stop.sh"}
 BLOCKED_SUFFIXES = {

@@ -39,14 +39,20 @@ def activate():
 @service.on_deactivate
 def deactivate():
     """Release package-owned model and GPU state."""
-    runtime.deactivate()
+    try:
+        runtime.deactivate()
+    except Exception as exc:
+        return Err(str(exc))
     return Ok()
 
 
 @service.on_shutdown
 def shutdown():
     """Discard configuration and release package-owned state."""
-    runtime.shutdown()
+    try:
+        runtime.shutdown()
+    except Exception as exc:
+        return Err(str(exc))
     return Ok()
 
 
@@ -61,7 +67,7 @@ def decide(request: Decide_Request) -> Decide_Response:
             DecisionRequest(
                 instruction=request.instruction,
                 observation_uri=request.observation_uri,
-                timeout_s=float(request.timeout_s or 30.0),
+                timeout_s=float(request.timeout_s),
             )
         )
     except (BackendError, RuntimeError, TypeError, ValueError) as exc:

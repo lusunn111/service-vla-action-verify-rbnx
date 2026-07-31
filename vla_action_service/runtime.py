@@ -25,9 +25,18 @@ class ServiceRuntime:
         with self._lock:
             if self._active:
                 raise RuntimeError("cannot reconfigure an active Service")
-            if self._backend is not None:
-                self._backend.close()
-            self._backend = build_backend(config)
+            replacement = build_backend(config)
+            previous = self._backend
+            if previous is not None:
+                try:
+                    previous.close()
+                except Exception:
+                    try:
+                        replacement.close()
+                    except Exception:
+                        pass
+                    raise
+            self._backend = replacement
 
     def activate(self) -> None:
         """Enter ACTIVE without loading the target model or Drafter."""
@@ -43,12 +52,18 @@ class ServiceRuntime:
             return self._backend.decide(request)
 
     def deactivate(self) -> None:
+        """Stop new calls and release model state, even if cleanup reports an error."""
         with self._lock:
-            if self._backend is not None:
-                self._backend.close()
+            backend = self._backend
             self._active = False
+            if backend is not None:
+                backend.close()
 
     def shutdown(self) -> None:
+        """Discard configuration and release the package-owned model state."""
         with self._lock:
-            self.deactivate()
+            backend = self._backend
             self._backend = None
+            self._active = False
+            if backend is not None:
+                backend.close()
