@@ -65,9 +65,9 @@ jobs:
           git -C /tmp/robonix submodule update --init --depth 1 capabilities/lib/common_interfaces capabilities/lib/rcl_interfaces
           cargo build --manifest-path /tmp/robonix/Cargo.toml -p robonix-cli --bin rbnx
           echo "/tmp/robonix-target/debug" >> "$GITHUB_PATH"
+      - name: Configure RoboNix CLI
+        run: /tmp/robonix-target/debug/rbnx setup /tmp/robonix
       - name: Validate and build package
-        env:
-          ROBONIX_SOURCE_PATH: /tmp/robonix
         run: |
           rbnx validate .
           rbnx build -p .
