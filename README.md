@@ -1,8 +1,8 @@
 <div align="center">
 
-# RoboNix Motion-Aware Action Verification and Recovery Skill
+# RoboNix VLA Action Decision Service
 
-**A system-level action verification, motion-aware compensation, and policy recovery Skill for embodied models**
+**A system-level action decision, speculative verification, and target-model fallback Service for embodied models**
 
 [中文文档](README-CN.md) · [🚀 Quick Start](#quick-start) · [⚙️ Requirements](#requirements) · [🧪 Validation](#validated-release) · [📝 Citation](#citation)
 
@@ -11,17 +11,39 @@
 ![CUDA](https://img.shields.io/badge/CUDA-12.1-76B900?logo=nvidia&logoColor=white)
 ![LIBERO](https://img.shields.io/badge/LIBERO-rollout_verified-1f9d72)
 [![License](https://img.shields.io/badge/license-MulanPSL--2.0-red)](LICENSE)
-[![GitHub Stars](https://img.shields.io/github/stars/lusunn111/RoboNix-Speculative-Decoding-Toolkit?style=flat&logo=github)](https://github.com/lusunn111/RoboNix-Speculative-Decoding-Toolkit/stargazers)
+[![GitHub Stars](https://img.shields.io/github/stars/lusunn111/service-vla-action-decision-rbnx?style=flat&logo=github)](https://github.com/lusunn111/service-vla-action-decision-rbnx/stargazers)
 
 </div>
 
-The **RoboNix Motion-Aware Action Verification and Recovery Skill** lets
+The **RoboNix VLA Action Decision Service** lets
 existing Vision-Language-Action (VLA) models verify low-cost action proposals
 with both the target model and motion priors before execution. Adaptive
 acceptance, motion compensation, and policy fallback reduce repeated large-model
-inference while preserving task-level reliability. The Skill currently supports
+inference while preserving task-level reliability. The research implementation currently supports
 OpenVLA with Drafter-based proposals, parallel verification, motion-aware
 compensation, and original-policy fallback.
+
+## RoboNix Service package
+
+The repository root is directly publishable as
+`robonix.service.vla.action_decision`. It exposes
+`robonix/service/vla/action_decision/decide`, returns candidate actions only,
+and never commands robot hardware. RoboNix activation does not import PyTorch
+or allocate GPU memory; the target model and Drafter load on the first real
+request.
+
+```bash
+python -m pip install -e '.[dev]'
+python -m pytest -q
+python scripts/release_audit.py
+rbnx validate .
+rbnx build -p .
+```
+
+The model checkpoints are deployment inputs and are not stored in Git. See
+[CAPABILITY.md](CAPABILITY.md) for the public interface and safety boundary.
+The complete research implementation and benchmark material below remain in
+this repository.
 
 <a id="performance-snapshot"></a>
 ## 📊 Performance Snapshot
@@ -57,8 +79,8 @@ speed while preserving task-level reliability across all four LIBERO suites.
 <a id="news"></a>
 ## 📰 News
 
-- **2026-07-19**: 🆕 Released the system-level action verification and recovery
-  Skill with capability results, model support, and bilingual documentation.
+- **2026-07-19**: 🆕 Released the system-level VLA action decision
+  Service with capability results, model support, and bilingual documentation.
 - **2026-07-18**: 🔥 Validated independent-root execution, target and Drafter
   checkpoint loading, and a bounded 100-step LIBERO rollout with H.264 video export.
 - **2026-07-18**: 🛠️ Added configurable DeepSpeed paths, task selection, rollout
@@ -67,7 +89,7 @@ speed while preserving task-level reliability across all four LIBERO suites.
 <a id="system-results"></a>
 ## ⚡ System Capability and Results
 
-From the RoboNix runtime perspective, this Skill sits between candidate action
+From the RoboNix runtime perspective, this Service sits between candidate action
 generation and robot execution. It verifies proposed actions, compensates
 recoverable motion errors, and triggers deterministic policy fallback when a
 candidate cannot be trusted.
@@ -106,7 +128,7 @@ Unlike fully autoregressive decoding, speculative decoding uses a smaller draft 
 <a id="robonix-integration"></a>
 ## 🔌 RoboNix Integration and Outlook
 
-This Skill is an independently deployable RoboNix provider connected through stable capability contracts. Physics-prior verification and fallback remain inside the provider, while Atlas handles discovery, Nexus transports requests, and Executor dispatches the resulting capability without changing the RoboNix core.
+This Service is an independently deployable RoboNix provider connected through stable capability contracts. Physics-prior verification and fallback remain inside the provider, while Atlas handles discovery, Nexus transports requests, and Executor dispatches the resulting capability without changing the RoboNix core.
 
 <div align="center">
   <img width="96%" alt="RoboNix system architecture" src="docs/assets/robonix-system-architecture.png" />
@@ -205,8 +227,8 @@ The repository does not include model weights, datasets, or LIBERO assets. Prepa
 Clone the project and run all commands from the repository root:
 
 ```bash
-git clone https://github.com/lusunn111/RoboNix-Speculative-Decoding-Toolkit.git
-cd RoboNix-Speculative-Decoding-Toolkit
+git clone https://github.com/lusunn111/service-vla-action-decision-rbnx.git
+cd service-vla-action-decision-rbnx
 
 conda create -n spec-decoding python=3.10 -y
 conda activate spec-decoding
@@ -404,22 +426,22 @@ The default strategy is `modules.strategies.modeling_speculation`. The `_1`, `_1
 - [ ] Publish compatible Drafter checkpoints with checksums and model cards.
 - [ ] Add autoregressive-versus-speculative benchmark tables and acceptance metrics.
 - [ ] Add more Drafter architectures and verification strategies.
-- [ ] Validate additional VLA model families through the same Skill contract.
+- [ ] Validate additional VLA model families through the same Service contract.
 - [ ] Provide a versioned RoboNix service adapter.
 
 <a id="citation"></a>
 ## 📝 Citation
 
-If this Skill supports your research, please consider giving the repository a
+If this Service supports your research, please consider giving the repository a
 star ⭐ and citing this software repository:
 
 ```bibtex
-@software{mao2026robonix_action_verification_recovery_skill,
+@software{mao2026robonix_vla_action_decision_service,
   author  = {Mao, Zhihao and He, Huiru and Zheng, Zihao},
-  title   = {RoboNix Motion-Aware Action Verification and Recovery Skill},
+  title   = {RoboNix VLA Action Decision Service},
   year    = {2026},
   version = {0.1.0},
-  url     = {https://github.com/lusunn111/RoboNix-Speculative-Decoding-Toolkit}
+  url     = {https://github.com/lusunn111/service-vla-action-decision-rbnx}
 }
 ```
 
@@ -428,7 +450,7 @@ star ⭐ and citing this software repository:
 
 We thank [HuiruHe](https://github.com/HuiruHe) and
 [zhengzihaoPKU](https://github.com/zhengzihaoPKU) for their contributions to
-the Skill. See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the contributor policy.
+the Service. See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the contributor policy.
 
 <a id="license"></a>
 ## 📄 License

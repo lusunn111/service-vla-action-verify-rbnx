@@ -1,0 +1,72 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e ".[dev]"
+      - run: python -m pytest -q
+
+  release-check:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: python -m pip install --upgrade pip
+      - run: python -m pip install -e ".[dev]"
+      - run: python scripts/release_audit.py
+      - run: python -m build
+
+  robonix-package:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            /tmp/robonix-target
+          key: robonix-dev-next-${{ runner.os }}-${{ hashFiles('package_manifest.yaml', 'capabilities/**') }}
+      - name: Build RoboNix CLI
+        env:
+          CARGO_TARGET_DIR: /tmp/robonix-target
+        run: |
+          git clone --depth 1 --branch dev-next https://github.com/syswonder/robonix.git /tmp/robonix
+          cargo build --manifest-path /tmp/robonix/Cargo.toml -p rbnx
+          echo "/tmp/robonix-target/debug" >> "$GITHUB_PATH"
+      - name: Validate and build package
+        env:
+          ROBONIX_SOURCE_PATH: /tmp/robonix
+        run: |
+          rbnx validate .
+          rbnx build -p .

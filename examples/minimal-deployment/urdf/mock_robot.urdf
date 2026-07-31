@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<robot name="speculative_skill_demo">
+  <link name="base_link">
+    <visual>
+      <geometry><box size="0.2 0.2 0.1"/></geometry>
+    </visual>
+  </link>
+</robot>

@@ -1,0 +1,9 @@
+[contract]
+id = "robonix/service/vla/action_decision/decide"
+version = "1"
+kind = "service"
+idl = "action_decision/srv/Decide.srv"
+description = "Return a candidate VLA action using speculative inference with target-model fallback."
+
+[mode]
+type = "rpc"

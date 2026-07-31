@@ -3,19 +3,27 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "robonix-speculative-decoding-service"
+name = "robonix-service-vla-action-decision"
 version = "0.1.0"
-description = "Organized standalone snapshot of the KERV speculative decoding implementation"
+description = "RoboNix VLA action decision service with speculative decoding"
 requires-python = ">=3.10"
-dynamic = ["dependencies"]
+dependencies = []
 
-[tool.setuptools.dynamic]
-dependencies = {file = ["requirements/requirements-min.txt"]}
+[project.optional-dependencies]
+dev = [
+  "build>=1.2",
+  "pytest>=8",
+  "pyyaml>=6",
+  "tomli>=2; python_version < '3.11'",
+]
 
 [tool.setuptools]
 py-modules = ["service_bootstrap"]
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["modules*", "scripts*", "utils*"]
+include = ["vla_action_service*", "modules*", "scripts*", "utils*"]
 exclude = ["vendor*", "benchmarks*", "tests*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

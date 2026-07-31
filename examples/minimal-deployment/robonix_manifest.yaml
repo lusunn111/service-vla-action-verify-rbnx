@@ -1,0 +1,32 @@
+manifestVersion: 1
+name: vla-action-decision-service-demo
+
+catalog:
+  name: robonix.robot.demo.vla_action_decision
+  version: 0.1.0
+  description: Desktop-only deployment for validating the VLA action decision Service.
+  license: MulanPSL-2.0
+  tags: [robot, deploy, demo, service]
+  maintainers:
+    - Zhihao Mao <lusunn111@users.noreply.github.com>
+
+system:
+  atlas: { listen: 127.0.0.1:50151, log: info }
+  executor: { listen: 127.0.0.1:50161, log: info }
+  soma:
+    robot_yaml: ./soma.yaml
+  pilot:
+    listen: 127.0.0.1:50171
+    log: info
+    vlm:
+      upstream: ${VLM_BASE_URL}
+      api_key: ${VLM_API_KEY}
+      model: ${VLM_MODEL}
+      api_format: openai
+  liaison: { listen: 127.0.0.1:50181, log: info }
+
+service:
+  - name: vla_action_decision
+    path: ../..
+    config:
+      backend_mode: mock
