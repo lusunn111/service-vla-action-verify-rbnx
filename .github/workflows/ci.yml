@@ -62,7 +62,7 @@ jobs:
           CARGO_TARGET_DIR: /tmp/robonix-target
         run: |
           git clone --depth 1 --branch dev-next https://github.com/syswonder/robonix.git /tmp/robonix
-          cargo build --manifest-path /tmp/robonix/Cargo.toml -p rbnx
+          cargo build --manifest-path /tmp/robonix/Cargo.toml -p robonix-cli --bin rbnx
           echo "/tmp/robonix-target/debug" >> "$GITHUB_PATH"
       - name: Validate and build package
         env:
