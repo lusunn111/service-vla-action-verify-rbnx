@@ -62,6 +62,7 @@ jobs:
           CARGO_TARGET_DIR: /tmp/robonix-target
         run: |
           git clone --depth 1 --branch dev-next https://github.com/syswonder/robonix.git /tmp/robonix
+          git -C /tmp/robonix submodule update --init --depth 1 capabilities/lib/common_interfaces capabilities/lib/rcl_interfaces
           cargo build --manifest-path /tmp/robonix/Cargo.toml -p robonix-cli --bin rbnx
           echo "/tmp/robonix-target/debug" >> "$GITHUB_PATH"
       - name: Validate and build package
