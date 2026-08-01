@@ -17,3 +17,11 @@
   safe-boundary deadlines; preserve primary inference errors during cleanup.
 - Add an isolated Wheel-install smoke test, explicit inference dependencies,
   guarded PID handling, selectable Service Python, and third-party notices.
+- Add a real RoboNix deployment, Executor/MCP client, deterministic RLDS input
+  extractor, structured direct/Service/fallback benchmark, and bilingual
+  reproduction instructions.
+- Clear retained speculative tree state before target-only fallback, permit
+  safe dynamic loopback MCP hosts, and select the pure-Python Protobuf runtime
+  required by the preserved inference dependencies.
+- Validate 90 measured direct and RoboNix calls with zero action error, real
+  target-model fallback, lazy GPU allocation, and complete GPU release.

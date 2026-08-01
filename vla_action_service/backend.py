@@ -130,7 +130,6 @@ class ResearchModelAdapter:
         self._cfg = None
         self._model = None
         self._processor = None
-        self._target_model = None
         try:
             cuda_visible_devices = str(
                 config.get("cuda_visible_devices", "")
@@ -168,13 +167,13 @@ class ResearchModelAdapter:
             )
             self._model = get_vla(self._cfg)
             self._processor = get_processor(self._cfg)
-            self._target_model = getattr(self._model, "base_model", None)
-            if self._target_model is None:
+            target_model = getattr(self._model, "base_model", None)
+            if target_model is None:
                 raise BackendError("SpecVLA wrapper does not expose its target model")
             if hasattr(self._model, "norm_stats"):
-                self._target_model.norm_stats = self._model.norm_stats
+                target_model.norm_stats = self._model.norm_stats
             self._model.eval()
-            self._target_model.eval()
+            target_model.eval()
         except BaseException:
             try:
                 self.close()
@@ -207,10 +206,28 @@ class ResearchModelAdapter:
             )
 
     def predict_target(self, image_path: Path, instruction: str) -> Any:
-        """Run the already-loaded target model without loading a second copy."""
+        """Run target-only decoding through the loaded SpecVLA wrapper.
+
+        The research loader replaces the base model's language model with a
+        speculation-aware implementation.  Calling ``base_model.generate``
+        directly bypasses the wrapper's cache setup and can leave the
+        attention mask inconsistent.  The wrapper's default generation path
+        is its target-only ``ea_forward`` implementation and reuses the same
+        target weights without invoking the Drafter.
+        """
+        # The research wrapper may retain its Drafter tree mask after model
+        # construction or a failed speculative call.  Target-only decoding
+        # must never consume that request-local state.
+        self._model.tree_mask = None
+        language_model = getattr(self._model.base_model, "language_model", None)
+        if language_model is not None and hasattr(language_model, "tree_mask"):
+            language_model.tree_mask = None
+        ea_layer = getattr(self._model, "ea_layer", None)
+        if ea_layer is not None and hasattr(ea_layer, "tree_mask"):
+            ea_layer.tree_mask = None
         with self._torch.inference_mode():
             return self._get_vla_action(
-                self._target_model,
+                self._model,
                 self._processor,
                 self._cfg.pretrained_checkpoint,
                 self._observation(image_path),
@@ -222,7 +239,6 @@ class ResearchModelAdapter:
     def close(self) -> None:
         """Release model references and package-owned CUDA cache."""
         torch_module = self._torch
-        self._target_model = None
         self._processor = None
         self._model = None
         self._get_vla_action = None

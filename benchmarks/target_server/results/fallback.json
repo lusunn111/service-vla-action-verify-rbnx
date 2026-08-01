@@ -1,0 +1,17 @@
+{
+  "actions": [
+    0.19326679765009414,
+    0.025409654075024157,
+    0.25,
+    -0.05858613617864311,
+    0.15040967394323912,
+    -0.002040441531468845,
+    0.0
+  ],
+  "case_id": "goal-00",
+  "fallback_used": true,
+  "fault": "Drafter exception injected by benchmark harness after real model loading",
+  "gpu_memory_mib": 39237,
+  "latency_ms": 1274.5667342096567,
+  "mode": "target_fallback"
+}

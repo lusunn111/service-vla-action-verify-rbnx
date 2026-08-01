@@ -25,4 +25,5 @@ trap 'rm -f "$PID_FILE"' EXIT
 printf '%s\n' "$$" > "$PID_FILE"
 
 export PYTHONPATH="$(rbnx path robonix-api):$PKG_ROOT:${PYTHONPATH:-}"
+export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION="${PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION:-python}"
 exec "$SERVICE_PYTHON" -m vla_action_service.main

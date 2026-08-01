@@ -48,6 +48,64 @@ OpenVLA/SpecVLA 推理源码，模型检查点仍作为部署输入，不进入 
 准确的验证边界见 [VALIDATION.md](VALIDATION.md)。下文的完整研究实现和基准材料
 继续保留。
 
+<a id="real-robonix-deployment"></a>
+## 真实 RoboNix 部署
+
+正式发布的真实数据流为：
+
+```text
+Executor（执行器）-> Atlas（能力注册中心）-> MCP（模型上下文协议）
+-> vla_action_decision -> 仓库自带 OpenVLA/SpecVLA 推理源码 -> 外部检查点
+```
+
+该能力只返回一个候选动作，绝不直接控制机器人硬件。已有检查点和观测数据应从
+独立大容量数据根目录通过核对后的软链接接入，不能把权重复制进仓库。测试机的具体
+目录策略和安全链接命令见
+[benchmarks/target_server/README.md](benchmarks/target_server/README.md)。
+
+```bash
+python3.10 -m venv /path/to/environments/vla-service
+source /path/to/environments/vla-service/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e '.[dev,inference]'
+
+rbnx validate .
+rbnx build -p .
+
+cd examples/real-deployment
+cp .env.example .env
+# 在不跟踪的 .env 中填写检查点、输入目录、GPU、缓存、运行目录和 Python 路径。
+set -a
+source .env
+set +a
+
+rbnx build -f robonix_manifest.yaml
+rbnx boot -v --no-update-check -f robonix_manifest.yaml
+rbnx caps -v --server 127.0.0.1:50351
+rbnx tools --server 127.0.0.1:50351
+rbnx describe --server 127.0.0.1:50351 --provider vla_action_decision
+rbnx inspect --server 127.0.0.1:50351
+```
+
+第一次调用前，Service 进程不应映射 PyTorch，也不应占用指定 GPU。真实调用必须
+经过 Executor：
+
+```bash
+python ../../benchmarks/target_server/invoke_executor.py \
+  --atlas 127.0.0.1:50351 \
+  --provider vla_action_decision \
+  --contract robonix/service/vla/action_decision/decide \
+  --args-json '{"instruction":"pick up the bowl","observation_uri":"/absolute/input/observation.jpg","timeout_s":600}' \
+  --timeout-s 900
+
+rbnx shutdown -f robonix_manifest.yaml
+```
+
+第一次 `decide` 才导入推理依赖并加载两个模型。推测执行失败后会调用已加载的
+目标模型，只有二者都失败才令 MCP 调用失败。观测图片必须位于
+`allowed_image_root` 内，并通过签名、大小和像素数校验。全部配置字段和默认值
+见 [config.spec](config.spec)。
+
 <a id="performance-snapshot"></a>
 ## 📊 效果概览
 
@@ -63,6 +121,7 @@ OpenVLA/SpecVLA 推理源码，模型检查点仍作为部署输入，不进入 
 
 ## 📚 目录
 
+- [真实 RoboNix 部署](#real-robonix-deployment)
 - [📊 效果概览](#performance-snapshot)
 - [📰 最新进展](#news)
 - [⚡ 系统能力与效果](#system-results)
@@ -142,22 +201,33 @@ IMAGEGEN ASSET
 <a id="validated-release"></a>
 ## 🧪 已验证版本
 
-下表对应此前完成的底层研究推理与仿真链路验证。
+0.1.0 发布候选版本已于 2026-08-01 使用 RoboNix 提交
+`48af09190b99f7847dddf68457eec2db42d2c1a7`、A100 40GB GPU、外部 OpenVLA
+LIBERO-Goal 检查点、兼容 Drafter 和 10 个真实 LIBERO-Goal 观测完成验收。
 
-| 验证项 | 结果 |
-| --- | --- |
-| 包结构与独立目录命令 | 6 项测试通过 |
-| 目标模型与已有 Drafter | 成功加载为 `SpecVLAforActionPrediction` |
-| LIBERO 冒烟 rollout | 任务 0，100 步上限，成功导出视频 |
-| 视频 | H.264、224×224、100 帧、30 FPS |
-| 训练入口 | DeepSpeed（分布式训练引擎）的模型、数据、输出和配置参数可解析 |
+| 路径 | 调用数 | 平均延迟 | P50 | P95 |
+| --- | ---: | ---: | ---: | ---: |
+| 直接目标模型 | 30 | 179.31 ms | 178.95 ms | 181.03 ms |
+| 直接推测执行 | 30 | 176.12 ms | 173.00 ms | 202.72 ms |
+| Executor -> Atlas -> MCP | 30 | 187.45 ms | 182.88 ms | 212.10 ms |
 
-该 rollout 主动限制为 100 步，因此不用于证明任务成功率或复现论文指标；它证明了
-目标模型加载、Drafter 挂载、仿真启动、动作生成和视频导出链路可以运行。
+30 次直接推测执行和 30 次 RoboNix 全链路动作完全一致，最大误差为 `0.0`。
+Drafter 真实故障注入成功进入目标模型回退；关闭后 GPU 1 从模型占用恢复到
+3 MiB 空闲基线。模型构建耗时 12.64 秒，第一次完整 Service 调用耗时 13.98 秒，
+P50 包装开销为 9.88 ms。
 
-它不代表本轮 RoboNix Service 已经在 `target-server` 完成 GPU、Atlas（能力目录）
-或 MCP（模型上下文协议）部署验收。自动化 Service 与分发包检查记录在
-[VALIDATION.md](VALIDATION.md)；研究脚本与能力输出逐项对比仍是正式发布前置条件。
+本次目标模型相对推测执行的 P50 加速比只有 1.034 倍，因此不能宣称显著性能收益。
+由于保留的 TensorFlow 图像预处理栈会预留大部分剩余显存，进程级峰值达到
+39,603 MiB；这对 40GB GPU 是必须明确披露的部署风险。
+
+![VLA 动作决策延迟](benchmarks/target_server/results/latency.svg)
+
+原始调用、回退证据、精确环境与报告边界见
+[benchmarks/target_server/](benchmarks/target_server/) 和
+[VALIDATION.md](VALIDATION.md)。
+
+此外，仓库保留了此前研究链路完成的 100 步 LIBERO 有界冒烟测试。它证明仿真
+接入和视频导出，不证明任务成功：
 
 ![已验证的 100 步 LIBERO rollout](docs/assets/validated-rollout-preview.png)
 

@@ -1,0 +1,8 @@
+{
+  "case_id": "goal-00",
+  "elapsed_ms": 13980.177300050855,
+  "fallback_used": false,
+  "gpu_memory_after_mib": 39579,
+  "gpu_memory_before_mib": 3,
+  "mode": "speculative"
+}
