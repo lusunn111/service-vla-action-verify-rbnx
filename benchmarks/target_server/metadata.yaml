@@ -1,0 +1,5 @@
+schema_version: 1
+status: pending_target_server_run
+service_version: 0.1.0
+contract: robonix/service/vla/action_decision/decide
+reporting_boundary: No latency, speedup, parity, or GPU-memory result is claimed until the structured result files are committed.

@@ -1,0 +1,43 @@
+manifestVersion: 1
+name: vla-action-decision-real-validation
+
+catalog:
+  name: robonix.robot.testing.vla_action_decision_real
+  version: 0.1.0
+  description: Service-only deployment for real OpenVLA and Drafter validation.
+  license: MulanPSL-2.0
+  tags: [robot, testing, service, vla]
+  maintainers:
+    - Zhihao Mao <lusunn111@users.noreply.github.com>
+
+system:
+  atlas: { listen: 127.0.0.1:50351, log: info }
+  executor: { listen: 127.0.0.1:50361, log: info }
+
+service:
+  - name: vla_action_decision
+    path: ../..
+    env:
+      ROBONIX_SERVICE_PYTHON: ${ROBONIX_SERVICE_PYTHON}
+      RBNX_RUNTIME_DIR: ${RBNX_RUNTIME_DIR}
+      ROBONIX_PROVIDER_BIND_HOST: 127.0.0.1
+      ROBONIX_ADVERTISE_HOST: 127.0.0.1
+      HF_HOME: ${HF_HOME}
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+      TOKENIZERS_PARALLELISM: "false"
+    config:
+      backend_mode: openvla
+      target_checkpoint: ${VLA_TARGET_CHECKPOINT}
+      drafter_checkpoint: ${VLA_DRAFTER_CHECKPOINT}
+      allowed_image_root: ${ROBONIX_VALIDATION_INPUT_ROOT}
+      cuda_visible_devices: ${VLA_CUDA_VISIBLE_DEVICES}
+      require_cuda: true
+      unnorm_key: libero_goal
+      center_crop: true
+      accept_threshold: 9
+      parallel_draft: false
+      load_in_8bit: false
+      load_in_4bit: false
+      expected_action_dim: 7
+      max_timeout_s: 600.0
