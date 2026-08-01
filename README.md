@@ -54,6 +54,67 @@ for complete mock and real configurations, and [VALIDATION.md](VALIDATION.md)
 for the exact validation boundary. The complete research implementation and
 benchmark material below remain in this repository.
 
+<a id="real-robonix-deployment"></a>
+## Real RoboNix deployment
+
+The release path is:
+
+```text
+Executor -> Atlas -> MCP -> vla_action_decision
+         -> repository-packaged OpenVLA/SpecVLA source -> external checkpoints
+```
+
+It returns one candidate action and never commands robot hardware. Existing
+checkpoints and observations should be connected from a large-volume data root
+through checked symbolic links; do not copy weights into this repository. The
+validation host's concrete storage layout and safe-link procedure are in
+[benchmarks/target_server/README.md](benchmarks/target_server/README.md).
+
+```bash
+python3.10 -m venv /path/to/environments/vla-service
+source /path/to/environments/vla-service/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -e '.[dev,inference]'
+
+rbnx validate .
+rbnx build -p .
+
+cd examples/real-deployment
+cp .env.example .env
+# Edit the untracked .env with checkpoint, input-root, GPU, cache, runtime,
+# and Service-Python paths for this deployment.
+set -a
+source .env
+set +a
+
+rbnx build -f robonix_manifest.yaml
+rbnx boot -v --no-update-check -f robonix_manifest.yaml
+rbnx caps -v --server 127.0.0.1:50351
+rbnx tools --server 127.0.0.1:50351
+rbnx describe --server 127.0.0.1:50351 --provider vla_action_decision
+rbnx inspect --server 127.0.0.1:50351
+```
+
+Before the first call, the Service process must not have mapped PyTorch and
+must not occupy the selected GPU. Invoke through Executor:
+
+```bash
+python ../../benchmarks/target_server/invoke_executor.py \
+  --atlas 127.0.0.1:50351 \
+  --provider vla_action_decision \
+  --contract robonix/service/vla/action_decision/decide \
+  --args-json '{"instruction":"pick up the bowl","observation_uri":"/absolute/input/observation.jpg","timeout_s":600}' \
+  --timeout-s 900
+
+rbnx shutdown -f robonix_manifest.yaml
+```
+
+The first `decide` lazily imports the inference stack and loads both models.
+If speculative decoding fails, the already-loaded target model is called; only
+dual failure fails the MCP call. The local observation must remain below
+`allowed_image_root` and pass signature, size, and pixel-count checks.
+Configuration fields and defaults are defined in [config.spec](config.spec).
+
 <a id="performance-snapshot"></a>
 ## 📊 Performance Snapshot
 
@@ -69,6 +130,7 @@ speed while preserving task-level reliability across all four LIBERO suites.
 
 ## 📚 Table of Contents
 
+- [Real RoboNix deployment](#real-robonix-deployment)
 - [📊 Performance Snapshot](#performance-snapshot)
 - [📰 News](#news)
 - [⚡ System Capability and Results](#system-results)
@@ -149,27 +211,37 @@ Looking forward, the same interface can support additional Drafters, physical co
 <a id="validated-release"></a>
 ## 🧪 Validated Release
 
-The preserved research workflow was validated on an NVIDIA A100 40GB server
-with an existing OpenVLA LIBERO-Goal checkpoint and a trained compatible
-Drafter.
+Release candidate 0.1.0 was validated on 2026-08-01 with RoboNix commit
+`48af09190b99f7847dddf68457eec2db42d2c1a7`, an A100 40GB GPU, the external
+OpenVLA LIBERO-Goal checkpoint and compatible Drafter, and ten real
+LIBERO-Goal observations.
 
-| Check | Result |
-| --- | --- |
-| Package and independent-root CLI tests | 6 passed |
-| Target model + trained Drafter | Loaded as `SpecVLAforActionPrediction` |
-| LIBERO smoke rollout | Task 0, 100-step cap, video exported |
-| Video artifact | H.264, 224×224, 100 frames, 30 FPS |
-| Training entry | Configurable DeepSpeed arguments exposed and parsed |
+| Route | Calls | Mean | P50 | P95 |
+| --- | ---: | ---: | ---: | ---: |
+| Direct target-only | 30 | 179.31 ms | 178.95 ms | 181.03 ms |
+| Direct speculative | 30 | 176.12 ms | 173.00 ms | 202.72 ms |
+| Executor -> Atlas -> MCP | 30 | 187.45 ms | 182.88 ms | 212.10 ms |
 
-The bounded rollout intentionally does not claim task success or reproduce a
-paper benchmark. It proves model loading, Drafter attachment, simulator
-execution, action generation, and video export.
+The 30 direct speculative and 30 full RoboNix actions matched exactly:
+maximum error `0.0`. A real Drafter fault injection reached target-model
+fallback, and shutdown returned GPU 1 from model occupancy to its 3 MiB idle
+baseline. Model construction took 12.64 s; the first full Service call took
+13.98 s; P50 wrapping overhead was 9.88 ms.
 
-It also does not claim that the current RoboNix Service wrapper has completed
-GPU, Atlas, or MCP deployment validation on `target-server`. Automated Service
-and distribution checks are recorded in [VALIDATION.md](VALIDATION.md); direct
-research-script versus capability-output comparison remains a pre-release
-gate.
+The measured target-to-speculative P50 speedup was only 1.034x, so this release
+does not claim a material speedup. Process-level GPU allocation peaked at
+39,603 MiB because the preserved TensorFlow preprocessing stack reserved most
+remaining memory; this is an explicit deployment risk on a 40GB GPU.
+
+![VLA action-decision latency](benchmarks/target_server/results/latency.svg)
+
+Raw calls, fallback evidence, exact environment, and reporting limits are in
+[benchmarks/target_server/](benchmarks/target_server/) and
+[VALIDATION.md](VALIDATION.md).
+
+Separately, the preserved research workflow previously completed a bounded
+100-step LIBERO smoke rollout. It proves simulator integration and video
+export, not task success:
 
 ![Validated 100-step LIBERO rollout](docs/assets/validated-rollout-preview.png)
 

@@ -42,7 +42,7 @@ def _load_generated_modules():
 
 def _inspect(atlas: str) -> dict:
     result = subprocess.run(
-        ["rbnx", "inspect", "--server", atlas, "--json"],
+        ["rbnx", "inspect", "--server", atlas],
         check=False,
         capture_output=True,
         text=True,

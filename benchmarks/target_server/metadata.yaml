@@ -1,5 +1,38 @@
 schema_version: 1
-status: pending_target_server_run
+status: passed
+validation_date: 2026-08-01
 service_version: 0.1.0
 contract: robonix/service/vla/action_decision/decide
-reporting_boundary: No latency, speedup, parity, or GPU-memory result is claimed until the structured result files are committed.
+robonix:
+  version: 0.1.0
+  commit: 48af09190b99f7847dddf68457eec2db42d2c1a7
+environment:
+  os: Ubuntu 22.04.5 LTS
+  kernel: 5.15.0-179-generic
+  python: 3.10.19
+  gpu: NVIDIA A100-PCIE-40GB
+  gpu_index: 1
+  driver: 550.54.14
+  torch: 2.2.0+cu121
+  transformers: 4.40.1
+  fastmcp: 3.4.4
+inputs:
+  dataset: modified LIBERO-Goal RLDS
+  case_count: 10
+  warmup_per_case_route: 1
+  measured_repeats_per_case_route: 3
+external_dependencies:
+  target_checkpoint: OpenVLA LIBERO-Goal
+  drafter_checkpoint: compatible trained Drafter
+results:
+  parity_failures: 0
+  max_action_error: 0.0
+  direct_target_calls: 30
+  direct_speculative_calls: 30
+  executor_mcp_calls: 30
+  real_target_fallback: passed
+  lifecycle_gpu_release: passed
+  summary: results/summary.json
+  calls: results/calls.csv
+  chart: results/latency.svg
+reporting_boundary: Functional parity and lifecycle benchmark; no new LIBERO success-rate or material-speedup claim.

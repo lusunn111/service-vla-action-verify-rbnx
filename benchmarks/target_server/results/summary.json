@@ -1,0 +1,60 @@
+{
+  "fallback": {
+    "actions": [
+      0.19326679765009414,
+      0.025409654075024157,
+      0.25,
+      -0.05858613617864311,
+      0.15040967394323912,
+      -0.002040441531468845,
+      0.0
+    ],
+    "case_id": "goal-00",
+    "fallback_used": true,
+    "fault": "Drafter exception injected by benchmark harness after real model loading",
+    "gpu_memory_mib": 39237,
+    "latency_ms": 1274.5667342096567,
+    "mode": "target_fallback"
+  },
+  "max_action_error": 0.0,
+  "model_load": {
+    "elapsed_ms": 12635.417661629617,
+    "gpu_memory_after_mib": 15329,
+    "gpu_memory_before_mib": 3
+  },
+  "parity_failures": 0,
+  "routes": {
+    "direct_speculative": {
+      "calls": 30,
+      "mean_ms": 176.11722657456994,
+      "p50_ms": 172.99786675721407,
+      "p95_ms": 202.71506253629923,
+      "peak_gpu_memory_mib": 39603
+    },
+    "direct_target": {
+      "calls": 30,
+      "mean_ms": 179.31251305465898,
+      "p50_ms": 178.9487274363637,
+      "p95_ms": 181.02905061095953,
+      "peak_gpu_memory_mib": 39603
+    },
+    "robonix_executor_mcp": {
+      "calls": 30,
+      "mean_ms": 187.44542949522534,
+      "p50_ms": 182.87658039480448,
+      "p95_ms": 212.10182271897793,
+      "peak_gpu_memory_mib": 39603
+    }
+  },
+  "schema_version": 1,
+  "service_cold_start": {
+    "case_id": "goal-00",
+    "elapsed_ms": 13980.177300050855,
+    "fallback_used": false,
+    "gpu_memory_after_mib": 39579,
+    "gpu_memory_before_mib": 3,
+    "mode": "speculative"
+  },
+  "service_wrapper_overhead_p50_ms": 9.878713637590408,
+  "speculative_speedup_p50": 1.0343984627712264
+}

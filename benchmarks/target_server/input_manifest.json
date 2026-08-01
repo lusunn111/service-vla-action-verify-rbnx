@@ -1,5 +1,126 @@
 {
-  "schema_version": 1,
+  "cases": [
+    {
+      "case_id": "goal-00",
+      "instruction": "put the bowl on the plate",
+      "observation": "goal-00.jpg",
+      "observation_sha256": "a84dd1c36ec6daf7b0f71a8a5b12c3d7595ac505e5f08a5a6e5738d92a41530e",
+      "source": {
+        "dataset": "libero_goal_no_noops",
+        "record_index": 0,
+        "shard": "libero_goal-train.tfrecord-00000-of-00016",
+        "step_index": 56
+      }
+    },
+    {
+      "case_id": "goal-01",
+      "instruction": "put the wine bottle on the rack",
+      "observation": "goal-01.jpg",
+      "observation_sha256": "c94e5ff238ba3e190c9a5266939619d3e9c0ba8bbee95402a6dcc1baba21387c",
+      "source": {
+        "dataset": "libero_goal_no_noops",
+        "record_index": 1,
+        "shard": "libero_goal-train.tfrecord-00000-of-00016",
+        "step_index": 77
+      }
+    },
+    {
+      "case_id": "goal-02",
+      "instruction": "put the wine bottle on the rack",
+      "observation": "goal-02.jpg",
+      "observation_sha256": "2ce328f1b866c453512a71ee90bef0b031c5398135125dd5e1d7ec0bbc33fb04",
+      "source": {
+        "dataset": "libero_goal_no_noops",
+        "record_index": 2,
+        "shard": "libero_goal-train.tfrecord-00000-of-00016",
+        "step_index": 75
+      }
+    },
+    {
+      "case_id": "goal-03",
+      "instruction": "open the top drawer and put the bowl inside",
+      "observation": "goal-03.jpg",
+      "observation_sha256": "2785f00fb42e151122ec0d6548b3ed4a5376f47d5481cda29628816d1f35da1e",
+      "source": {
+        "dataset": "libero_goal_no_noops",
+        "record_index": 3,
+        "shard": "libero_goal-train.tfrecord-00000-of-00016",
+        "step_index": 88
+      }
+    },
+    {
+      "case_id": "goal-04",
+      "instruction": "open the top drawer and put the bowl inside",
+      "observation": "goal-04.jpg",
+      "observation_sha256": "3e2dd6194919212267ca8f82602f55d53fd97df90c1d1d395df635aa07cea887",
+      "source": {
+        "dataset": "libero_goal_no_noops",
+        "record_index": 4,
+        "shard": "libero_goal-train.tfrecord-00000-of-00016",
+        "step_index": 109
+      }
+    },
+    {
+      "case_id": "goal-05",
+      "instruction": "put the cream cheese in the bowl",
+      "observation": "goal-05.jpg",
+      "observation_sha256": "5939e85739eafe78d81f0508e95d93b6c41dcc19755d5ca3005ee32b1c502af0",
+      "source": {
+        "dataset": "libero_goal_no_noops",
+        "record_index": 5,
+        "shard": "libero_goal-train.tfrecord-00000-of-00016",
+        "step_index": 56
+      }
+    },
+    {
+      "case_id": "goal-06",
+      "instruction": "put the wine bottle on top of the cabinet",
+      "observation": "goal-06.jpg",
+      "observation_sha256": "afc47fa6c7d80685c553f1371a8df2741975a1b5d692d6ae5a1ab08b803ee21f",
+      "source": {
+        "dataset": "libero_goal_no_noops",
+        "record_index": 6,
+        "shard": "libero_goal-train.tfrecord-00000-of-00016",
+        "step_index": 45
+      }
+    },
+    {
+      "case_id": "goal-07",
+      "instruction": "push the plate to the front of the stove",
+      "observation": "goal-07.jpg",
+      "observation_sha256": "b142ec2aec8b539b0f60563c516a5162eb904a203cb332cb650239a5b620930c",
+      "source": {
+        "dataset": "libero_goal_no_noops",
+        "record_index": 7,
+        "shard": "libero_goal-train.tfrecord-00000-of-00016",
+        "step_index": 61
+      }
+    },
+    {
+      "case_id": "goal-08",
+      "instruction": "open the top drawer and put the bowl inside",
+      "observation": "goal-08.jpg",
+      "observation_sha256": "ee46e85dfb744c54e25ae2fb97edb2934c6eac04924d9bea621b56cb858bef78",
+      "source": {
+        "dataset": "libero_goal_no_noops",
+        "record_index": 8,
+        "shard": "libero_goal-train.tfrecord-00000-of-00016",
+        "step_index": 135
+      }
+    },
+    {
+      "case_id": "goal-09",
+      "instruction": "turn on the stove",
+      "observation": "goal-09.jpg",
+      "observation_sha256": "e55486090c9f2e05f8fa033d20094eaeba68c58769bdb4b67899c26ab7dfacdd",
+      "source": {
+        "dataset": "libero_goal_no_noops",
+        "record_index": 9,
+        "shard": "libero_goal-train.tfrecord-00000-of-00016",
+        "step_index": 45
+      }
+    }
+  ],
   "description": "Real LIBERO-Goal observations are extracted from licensed assets and are not redistributed.",
-  "cases": []
+  "schema_version": 1
 }

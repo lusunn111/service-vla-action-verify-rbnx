@@ -17,15 +17,6 @@ system:
 service:
   - name: vla_action_decision
     path: ../..
-    env:
-      ROBONIX_SERVICE_PYTHON: ${ROBONIX_SERVICE_PYTHON}
-      RBNX_RUNTIME_DIR: ${RBNX_RUNTIME_DIR}
-      ROBONIX_PROVIDER_BIND_HOST: 127.0.0.1
-      ROBONIX_ADVERTISE_HOST: 127.0.0.1
-      HF_HOME: ${HF_HOME}
-      HF_HUB_OFFLINE: "1"
-      TRANSFORMERS_OFFLINE: "1"
-      TOKENIZERS_PARALLELISM: "false"
     config:
       backend_mode: openvla
       target_checkpoint: ${VLA_TARGET_CHECKPOINT}

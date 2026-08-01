@@ -80,7 +80,9 @@ def _gpu_memory_mib(index: str) -> int:
 def _write_csv(path: Path, rows: list[dict]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as stream:
-        writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+        writer = csv.DictWriter(
+            stream, fieldnames=list(rows[0]), lineterminator="\n"
+        )
         writer.writeheader()
         writer.writerows(rows)
 
@@ -89,7 +91,14 @@ def run_direct(args, cases: list[dict]) -> None:
     backend = OpenVLADecisionBackend(_config(args))
     rows = []
     try:
+        memory_before = _gpu_memory_mib(str(args.gpu_index))
+        load_started = time.perf_counter()
         adapter = backend._ensure_ready()
+        model_load = {
+            "elapsed_ms": (time.perf_counter() - load_started) * 1000.0,
+            "gpu_memory_before_mib": memory_before,
+            "gpu_memory_after_mib": _gpu_memory_mib(str(args.gpu_index)),
+        }
         for case in cases:
             image = Path(case["path"])
             instruction = str(case["instruction"])
@@ -112,12 +121,31 @@ def run_direct(args, cases: list[dict]) -> None:
     finally:
         backend.close()
     _write_csv(args.output_dir / "direct_calls.csv", rows)
+    (args.output_dir / "model_load.json").write_text(
+        json.dumps(model_load, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
 
 
 def run_service(args, cases: list[dict]) -> None:
     client = ExecutorClient(args.atlas, timeout_s=900.0)
     rows = []
     try:
+        first = cases[0]
+        cold_wire = {
+            "instruction": str(first["instruction"]),
+            "observation_uri": first["path"],
+            "timeout_s": 600.0,
+        }
+        memory_before = _gpu_memory_mib(str(args.gpu_index))
+        cold = client.call(args.provider, CONTRACT, cold_wire)
+        cold_start = {
+            "case_id": first["case_id"],
+            "elapsed_ms": cold.elapsed_ms,
+            "gpu_memory_before_mib": memory_before,
+            "gpu_memory_after_mib": _gpu_memory_mib(str(args.gpu_index)),
+            "mode": cold.output.get("mode", ""),
+            "fallback_used": cold.output.get("fallback_used", False),
+        }
         for case in cases:
             wire = {"instruction": str(case["instruction"]), "observation_uri": case["path"], "timeout_s": 600.0}
             for _ in range(args.warmup):
@@ -133,6 +161,9 @@ def run_service(args, cases: list[dict]) -> None:
     finally:
         client.close()
     _write_csv(args.output_dir / "service_calls.csv", rows)
+    (args.output_dir / "service_cold_start.json").write_text(
+        json.dumps(cold_start, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+    )
 
 
 class _FailingSpeculativeAdapter:
@@ -183,7 +214,12 @@ def _percentile(values: list[float], fraction: float) -> float:
 def run_summary(args) -> None:
     direct = _read_csv(args.output_dir / "direct_calls.csv")
     service = _read_csv(args.output_dir / "service_calls.csv")
+    _write_csv(args.output_dir / "calls.csv", [*direct, *service])
     fallback = json.loads((args.output_dir / "fallback.json").read_text(encoding="utf-8"))
+    model_load = json.loads((args.output_dir / "model_load.json").read_text(encoding="utf-8"))
+    service_cold_start = json.loads(
+        (args.output_dir / "service_cold_start.json").read_text(encoding="utf-8")
+    )
     direct_spec = {(row["case_id"], row["iteration"]): json.loads(row["actions_json"]) for row in direct if row["route"] == "direct_speculative"}
     parity_failures = 0
     max_error = 0.0
@@ -208,7 +244,12 @@ def run_summary(args) -> None:
         }
     summary = {
         "schema_version": 1, "parity_failures": parity_failures, "max_action_error": max_error,
-        "routes": routes, "fallback": fallback,
+        "routes": routes, "fallback": fallback, "model_load": model_load,
+        "service_cold_start": service_cold_start,
+        "service_wrapper_overhead_p50_ms": (
+            routes["robonix_executor_mcp"]["p50_ms"]
+            - routes["direct_speculative"]["p50_ms"]
+        ),
         "speculative_speedup_p50": routes["direct_target"]["p50_ms"] / routes["direct_speculative"]["p50_ms"],
     }
     (args.output_dir / "summary.json").write_text(json.dumps(summary, indent=2, sort_keys=True) + "\n", encoding="utf-8")

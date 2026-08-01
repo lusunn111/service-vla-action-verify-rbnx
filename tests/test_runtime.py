@@ -1,8 +1,10 @@
 import json
 import math
 import time
+from contextlib import nullcontext
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from types import SimpleNamespace
 
 import pytest
 
@@ -10,6 +12,7 @@ from vla_action_service.backend import (
     BackendError,
     DecisionRequest,
     OpenVLADecisionBackend,
+    ResearchModelAdapter,
 )
 from vla_action_service.runtime import ServiceRuntime
 
@@ -103,6 +106,36 @@ def test_speculative_failure_reuses_target_model_for_fallback():
         assert result.mode == "target_fallback"
         assert result.fallback_used
         assert not result.fallback_required
+
+
+def test_target_adapter_clears_speculative_tree_state_and_uses_wrapper():
+    adapter = ResearchModelAdapter.__new__(ResearchModelAdapter)
+    language_model = SimpleNamespace(tree_mask="stale-language-tree")
+    base_model = SimpleNamespace(language_model=language_model)
+    ea_layer = SimpleNamespace(tree_mask="stale-drafter-tree")
+    wrapper = SimpleNamespace(
+        tree_mask="stale-wrapper-tree", base_model=base_model, ea_layer=ea_layer
+    )
+    calls = []
+    adapter._model = wrapper
+    adapter._processor = object()
+    adapter._torch = SimpleNamespace(inference_mode=nullcontext)
+    adapter._cfg = SimpleNamespace(
+        pretrained_checkpoint="checkpoint",
+        unnorm_key="libero_goal",
+        center_crop=True,
+    )
+    adapter._observation = lambda _path: {"full_image": object()}
+    adapter._get_vla_action = lambda model, *args, **kwargs: (
+        calls.append((model, kwargs)) or [0.0] * 7
+    )
+
+    assert adapter.predict_target(Path("observation.jpg"), "move") == [0.0] * 7
+    assert calls[0][0] is wrapper
+    assert "generate_mode" not in calls[0][1]
+    assert wrapper.tree_mask is None
+    assert language_model.tree_mask is None
+    assert ea_layer.tree_mask is None
 
 
 def test_both_inference_paths_failing_is_a_call_error():

@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import ipaddress
+import os
+
 from action_decision_mcp import Decide_Request, Decide_Response
 from robonix_api import Err, Ok, Service
 
@@ -14,6 +17,39 @@ service = Service(
     namespace="robonix/service/vla/action_decision",
 )
 runtime = ServiceRuntime()
+
+
+def _install_secure_loopback_mcp_app() -> None:
+    """Allow dynamic loopback ports with MCP SDK DNS-rebinding protection."""
+    install = getattr(service, "use_mcp_app", None)
+    if not callable(install):
+        return
+    bind_host = os.environ.get("ROBONIX_PROVIDER_BIND_HOST", "127.0.0.1").strip()
+    protect_loopback = ipaddress.ip_address(bind_host).is_loopback
+    from mcp.server.fastmcp import FastMCP
+    from mcp.server.transport_security import TransportSecuritySettings
+
+    allowed_hosts = [f"{bind_host}:*"]
+    allowed_origins = [f"http://{bind_host}:*", f"https://{bind_host}:*"]
+    if protect_loopback:
+        allowed_hosts.extend(["127.0.0.1:*", "localhost:*"])
+        allowed_origins.extend(
+            ["http://127.0.0.1:*", "http://localhost:*", "https://localhost:*"]
+        )
+    install(
+        FastMCP(
+            service.id,
+            host=bind_host,
+            transport_security=TransportSecuritySettings(
+                enable_dns_rebinding_protection=protect_loopback,
+                allowed_hosts=sorted(set(allowed_hosts)),
+                allowed_origins=sorted(set(allowed_origins)),
+            ),
+        )
+    )
+
+
+_install_secure_loopback_mcp_app()
 
 
 @service.on_init
