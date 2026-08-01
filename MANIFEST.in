@@ -1,0 +1,3 @@
+graft vendor/openvla
+include THIRD_PARTY_NOTICES.md
+global-exclude __pycache__ *.py[cod]

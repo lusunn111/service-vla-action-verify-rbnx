@@ -42,3 +42,25 @@ def test_cli_help_works_from_independent_toolkit_root():
     )
     assert result.returncode == 0, result.stderr
     assert "Path relative to vendor/openvla" in result.stdout
+
+
+def test_service_activation_does_not_import_gpu_or_model_dependencies():
+    code = """
+import sys
+from vla_action_service.runtime import ServiceRuntime
+runtime = ServiceRuntime()
+runtime.configure({"backend_mode": "mock"})
+runtime.activate()
+blocked = {"torch", "tensorflow", "transformers"} & set(sys.modules)
+if blocked:
+    print(f"eager imports: {sorted(blocked)}", file=sys.stderr)
+raise SystemExit(1 if blocked else 0)
+"""
+    result = subprocess.run(
+        [sys.executable, "-c", code],
+        cwd=SERVICE_ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr

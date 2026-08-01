@@ -17,4 +17,9 @@ wandb/
 *.pth
 *.ckpt
 *.safetensors
-
+.run/
+build/
+dist/
+*.egg-info/
+rbnx-build/
+rbnx-boot/

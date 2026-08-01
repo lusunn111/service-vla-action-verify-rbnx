@@ -1,8 +1,8 @@
 <div align="center">
 
-# RoboNix 运动感知动作校验与恢复 Skill
+# RoboNix VLA 动作决策 Service
 
-**面向具身模型的系统级动作校验、运动补偿与策略恢复 Skill（技能）**
+**面向具身模型的系统级动作决策、推测校验与目标模型回退 Service（服务）**
 
 [English](README.md) · [🚀 快速开始](#quick-start) · [⚙️ 环境要求](#requirements) · [🧪 验证结果](#validated-release) · [📝 引用](#citation)
 
@@ -11,14 +11,42 @@
 ![CUDA](https://img.shields.io/badge/CUDA-12.1-76B900?logo=nvidia&logoColor=white)
 ![LIBERO](https://img.shields.io/badge/LIBERO-rollout_verified-1f9d72)
 [![License](https://img.shields.io/badge/license-MulanPSL--2.0-red)](LICENSE)
-[![GitHub Stars](https://img.shields.io/github/stars/lusunn111/RoboNix-Speculative-Decoding-Toolkit?style=flat&logo=github)](https://github.com/lusunn111/RoboNix-Speculative-Decoding-Toolkit/stargazers)
+[![GitHub Stars](https://img.shields.io/github/stars/lusunn111/service-vla-action-decision-rbnx?style=flat&logo=github)](https://github.com/lusunn111/service-vla-action-decision-rbnx/stargazers)
 
 </div>
 
-**RoboNix 运动感知动作校验与恢复 Skill** 面向现有 VLA（视觉语言动作模型），让
+**RoboNix VLA 动作决策 Service** 面向现有 VLA（视觉语言动作模型），让
 低成本候选动作经过目标模型与运动先验共同校验后再进入执行。系统通过自适应接受、
 运动补偿和策略回退减少重复的大模型推理，同时保持任务级执行可靠性。当前已支持
 OpenVLA，以及 Drafter 候选生成、并行验证、运动感知补偿和原策略回退。
+
+## RoboNix Service 软件包
+
+仓库根目录可以直接作为 `robonix.service.vla.action_decision` 发布，对外提供
+`robonix/service/vla/action_decision/decide`。Service 只返回候选动作，不控制
+机器人硬件。RoboNix 激活阶段不会导入 PyTorch 或占用 GPU，目标模型与 Drafter
+在第一次真实请求时延迟加载。
+
+仓库检查使用：
+
+```bash
+python -m pip install -e '.[dev]'
+python -m pytest -q
+python scripts/release_audit.py
+python -m build
+python scripts/verify_distribution.py
+rbnx validate .
+rbnx build -p .
+```
+
+真实推理应使用 Python 3.10 或 3.11，并在匹配 CUDA 的环境中安装
+`.[inference]`。Wheel（Python 二进制分发包）已经包含 Service 适配器和
+OpenVLA/SpecVLA 推理源码，模型检查点仍作为部署输入，不进入 Git。RoboNix
+启动时可用 `ROBONIX_SERVICE_PYTHON` 指向该推理环境。公开接口与安全边界见
+[CAPABILITY.md](CAPABILITY.md)，完整模拟与真实配置见
+[examples/minimal-deployment/README.md](examples/minimal-deployment/README.md)，
+准确的验证边界见 [VALIDATION.md](VALIDATION.md)。下文的完整研究实现和基准材料
+继续保留。
 
 <a id="performance-snapshot"></a>
 ## 📊 效果概览
@@ -54,7 +82,7 @@ OpenVLA，以及 Drafter 候选生成、并行验证、运动感知补偿和原�
 <a id="news"></a>
 ## 📰 最新进展
 
-- **2026-07-19**：🆕 发布系统级动作校验与恢复 Skill，补充能力效果、
+- **2026-07-19**：🆕 发布系统级 VLA 动作决策 Service，补充能力效果、
   模型支持和中英文文档。
 - **2026-07-18**：🔥 完成独立目录运行验证，成功加载目标模型与已有 Drafter，
   并导出 100 步 LIBERO H.264 rollout 视频。
@@ -63,7 +91,7 @@ OpenVLA，以及 Drafter 候选生成、并行验证、运动感知补偿和原�
 <a id="system-results"></a>
 ## ⚡ 系统能力与效果
 
-从 RoboNix 运行时视角看，该 Skill 位于候选动作生成与机器人执行之间，负责校验
+从 RoboNix 运行时视角看，该 Service 位于候选动作生成与机器人执行之间，负责校验
 候选动作、补偿可恢复的运动误差，并在候选不可信时触发确定性的原策略回退。
 
 | 系统级结果 | 当前能力 |
@@ -102,7 +130,7 @@ IMAGEGEN ASSET
 <a id="robonix-integration"></a>
 ## 🔌 RoboNix 集成与前景
 
-该 Skill 是一个可独立部署的 RoboNix 能力提供方，通过稳定的能力契约接入系统。基于物理先验的验证与回退逻辑保留在能力提供方内部，Atlas 负责能力发现，Nexus 负责请求传输，Executor 负责能力调度，不需要修改 RoboNix 核心运行时。
+该 Service 是一个可独立部署的 RoboNix 能力提供方，通过稳定的能力契约接入系统。基于物理先验的验证与回退逻辑保留在能力提供方内部，Atlas 负责能力发现，Nexus 负责请求传输，Executor 负责能力调度，不需要修改 RoboNix 核心运行时。
 
 <div align="center">
   <img width="96%" alt="RoboNix 系统架构" src="docs/assets/robonix-system-architecture.png" />
@@ -114,6 +142,8 @@ IMAGEGEN ASSET
 <a id="validated-release"></a>
 ## 🧪 已验证版本
 
+下表对应此前完成的底层研究推理与仿真链路验证。
+
 | 验证项 | 结果 |
 | --- | --- |
 | 包结构与独立目录命令 | 6 项测试通过 |
@@ -124,6 +154,10 @@ IMAGEGEN ASSET
 
 该 rollout 主动限制为 100 步，因此不用于证明任务成功率或复现论文指标；它证明了
 目标模型加载、Drafter 挂载、仿真启动、动作生成和视频导出链路可以运行。
+
+它不代表本轮 RoboNix Service 已经在 `target-server` 完成 GPU、Atlas（能力目录）
+或 MCP（模型上下文协议）部署验收。自动化 Service 与分发包检查记录在
+[VALIDATION.md](VALIDATION.md)；研究脚本与能力输出逐项对比仍是正式发布前置条件。
 
 ![已验证的 100 步 LIBERO rollout](docs/assets/validated-rollout-preview.png)
 
@@ -151,7 +185,7 @@ python -m scripts.run --help
 | 组件 | 要求 |
 | --- | --- |
 | 操作系统 | 推荐 Linux，DeepSpeed 与无头 LIBERO/MuJoCo 评测依赖 Linux 环境 |
-| Python | 3.10 或更高版本 |
+| Python | 软件包检查支持 3.10 以上；固定版本真实推理使用 3.10 或 3.11 |
 | PyTorch | 2.2.0 |
 | CUDA | 已验证环境为 CUDA 12.1，需与 PyTorch 和驱动版本匹配 |
 | 仿真环境 | LIBERO 0.1.0、MuJoCo 与 EGL |
@@ -246,21 +280,21 @@ bash train_ds_libero_goal.sh
 - [ ] 发布带校验值和模型卡的兼容 Drafter 检查点。
 - [ ] 补充自回归与推测解码的端到端基准和接受率指标。
 - [ ] 接入更多 Drafter 结构与验证策略。
-- [ ] 通过统一 Skill 契约验证更多 VLA 模型系列。
-- [ ] 提供带版本号的 RoboNix 服务适配器。
+- [ ] 通过统一 Service 契约验证更多 VLA 模型系列。
+- [x] 提供带版本号的 RoboNix Service 适配器和能力契约。
 
 <a id="citation"></a>
 ## 📝 引用
 
-如果该 Skill 对你的研究有帮助，欢迎给仓库一个 Star ⭐，并引用本软件仓库：
+如果该 Service 对你的研究有帮助，欢迎给仓库一个 Star ⭐，并引用本软件仓库：
 
 ```bibtex
-@software{mao2026robonix_action_verification_recovery_skill,
+@software{mao2026robonix_vla_action_decision_service,
   author  = {Mao, Zhihao and He, Huiru and Zheng, Zihao},
-  title   = {RoboNix Motion-Aware Action Verification and Recovery Skill},
+  title   = {RoboNix VLA Action Decision Service},
   year    = {2026},
   version = {0.1.0},
-  url     = {https://github.com/lusunn111/RoboNix-Speculative-Decoding-Toolkit}
+  url     = {https://github.com/lusunn111/service-vla-action-decision-rbnx}
 }
 ```
 
@@ -268,7 +302,7 @@ bash train_ds_libero_goal.sh
 ## 🤝 贡献者
 
 感谢 [HuiruHe](https://github.com/HuiruHe) 和
-[zhengzihaoPKU](https://github.com/zhengzihaoPKU) 对该 Skill 的贡献。贡献者记录
+[zhengzihaoPKU](https://github.com/zhengzihaoPKU) 对该 Service 的贡献。贡献者记录
 规则见 [CONTRIBUTORS.md](CONTRIBUTORS.md)。
 
 <a id="license"></a>

@@ -1,0 +1,12 @@
+string instruction
+string observation_uri
+float32 timeout_s
+---
+bool success
+float32[] actions
+uint32 action_horizon
+uint32 action_dim
+string mode
+bool fallback_used
+bool fallback_required
+string detail
