@@ -25,3 +25,6 @@
   required by the preserved inference dependencies.
 - Validate 90 measured direct and RoboNix calls with zero action error, real
   target-model fallback, lazy GPU allocation, and complete GPU release.
+- Add a successful 120-step LIBERO rollout whose every policy action traverses
+  Executor, Atlas, MCP, and the Service, plus a plain side-by-side time-scaled
+  README video and reproducible recording scripts.

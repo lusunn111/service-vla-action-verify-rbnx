@@ -35,4 +35,12 @@ results:
   summary: results/summary.json
   calls: results/calls.csv
   chart: results/latency.svg
-reporting_boundary: Functional parity and lifecycle benchmark; no new LIBERO success-rate or material-speedup claim.
+  live_rollout:
+    validation_date: 2026-08-02
+    task_suite: libero_goal
+    task_id: 0
+    initial_state: 0
+    policy_steps: 120
+    success: true
+    summary: results/rollout-summary.json
+reporting_boundary: Functional parity, lifecycle, and one successful rollout; no new success-rate or material-speedup claim.

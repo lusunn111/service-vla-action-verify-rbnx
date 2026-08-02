@@ -20,6 +20,9 @@ def test_real_deployment_and_benchmark_framework_are_versioned():
         "extract_inputs.py",
         "invoke_executor.py",
         "run_benchmark.py",
+        "run_robonix_rollout.py",
+        "render_readme_media.py",
+        "render_speed_comparison.py",
         "render_results.py",
     ):
         py_compile.compile(str(BENCHMARK / name), doraise=True)
@@ -41,6 +44,14 @@ def test_committed_real_results_are_complete_and_reproducible(tmp_path):
     assert summary["routes"]["direct_target"]["calls"] == 30
     assert summary["routes"]["direct_speculative"]["calls"] == 30
     assert summary["routes"]["robonix_executor_mcp"]["calls"] == 30
+    rollout = json.loads((results / "rollout-summary.json").read_text())
+    assert rollout["route"] == "Executor -> Atlas -> MCP -> vla_action_decision"
+    assert rollout["task_suite"] == "libero_goal"
+    assert rollout["task_id"] == 0
+    assert rollout["initial_state"] == 0
+    assert rollout["success"] is True
+    assert rollout["policy_steps"] == 120
+    assert rollout["wall_time_s"] > 0
     with (results / "calls.csv").open(newline="", encoding="utf-8") as stream:
         assert sum(1 for _ in csv.DictReader(stream)) == 90
 

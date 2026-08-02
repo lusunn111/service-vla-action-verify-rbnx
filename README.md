@@ -57,18 +57,32 @@ contract is `robonix/service/vla/action_decision/decide`.
 ## 🎬 Demo Video
 
 <div align="center">
-  <a href="docs/assets/readme/vla-validation-reel.mp4"><img width="100%" src="docs/assets/readme/vla-validation-reel.gif" alt="VLA Action Decision Service validation evidence reel"></a>
-  <p><sub>Click the animation to play the MP4. This reel visualizes the architecture and committed structured results; it is not a robot task-success demo.</sub></p>
+  <a href="docs/assets/readme/vla-validation-reel.mp4"><img width="100%" src="docs/assets/readme/vla-validation-reel.gif" alt="Successful RoboNix-driven LIBERO rollout"></a>
+  <p><sub>Click the animation to play the MP4. Left: the original motion sequence at 1.00×. Right: the same real successful rollout directly time-scaled to 1.57×.</sub></p>
 </div>
 
-The reel is deterministically generated from the structured project results in
-`benchmarks/research_results/summary.json`, the RoboNix integration results in
-`benchmarks/target_server/results/summary.json`, and committed architecture
-assets. It contains no restricted LIBERO observation image. Regenerate it with:
+The video records LIBERO-Goal task 0, initial state 0: **“open the middle drawer
+of the cabinet.”** The Service completed the task in 120 policy steps. The
+full RoboNix route took 42.64 seconds. Both panels use the simulator frames from
+that one real successful run; the right panel is directly sampled at the
+project's 1.57× peak ratio and reaches the same terminal frame earlier. This is
+simulation evidence, not a second timed benchmark or a physical-robot claim.
+Run, record, and render the same layout with:
 
 ```bash
 python -m pip install 'Pillow>=10' 'imageio>=2.34' 'imageio-ffmpeg>=0.5' 'numpy>=1.26'
-python benchmarks/target_server/render_readme_media.py
+python benchmarks/target_server/run_robonix_rollout.py \
+  --atlas 127.0.0.1:50351 \
+  --provider vla_action_decision \
+  --output-dir "$RUN_ROOT" \
+  --task-suite libero_goal --task-id 0 --initial-state 0 \
+  --max-steps 300 --fps 30
+
+python benchmarks/target_server/render_speed_comparison.py \
+  --observations "$RUN_ROOT/observations" \
+  --summary "$RUN_ROOT/summary.json" \
+  --output "$RUN_ROOT/vla-speed-comparison.mp4" \
+  --speedup 1.57 --fps 30
 ```
 
 <a id="release-results"></a>
@@ -88,6 +102,7 @@ rather than by importing the provider class directly.
 | Lazy model construction | 12.64 s; first full call 13.98 s | `benchmarks/target_server/results/model_load.json` |
 | Measured P50 speedup | 1.034×, not a material speedup | `benchmarks/target_server/results/summary.json` |
 | Peak process GPU allocation | 39,603 MiB, an explicit 40 GB deployment risk | `benchmarks/target_server/results/summary.json` |
+| Recorded live rollout | Success in 120 policy steps | `benchmarks/target_server/results/rollout-summary.json` |
 
 <div align="center">
   <img width="100%" src="docs/assets/readme/vla-validation-summary.webp" alt="Validated VLA parity, fallback, latency, and resource summary">
@@ -103,7 +118,7 @@ rather than by importing the provider class directly.
 | Run the real Service | `examples/real-deployment/README.md` | RoboNix, CUDA, target checkpoint, and Drafter checkpoint |
 | Invoke through Executor/MCP | `benchmarks/target_server/invoke_executor.py` | A booted deployment and a valid local observation |
 | Reproduce parity and fallback | `benchmarks/target_server/run_benchmark.py` | An isolated inference environment and free 40 GB-class GPU |
-| Rebuild README evidence media | `benchmarks/target_server/render_readme_media.py` | Committed structured results only |
+| Record and compare a real rollout | `run_robonix_rollout.py` + `render_speed_comparison.py` | Booted Service, LIBERO, checkpoints, and a free 40 GB-class GPU |
 
 ## RoboNix Service package
 

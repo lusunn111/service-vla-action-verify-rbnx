@@ -1,0 +1,15 @@
+{
+  "initial_state": 0,
+  "instruction": "open the middle drawer of the cabinet",
+  "latency_mean_ms": 303.4564652092134,
+  "latency_p50_ms": 183.56859032064676,
+  "latency_p95_ms": 215.32166469842196,
+  "policy_steps": 120,
+  "route": "Executor -> Atlas -> MCP -> vla_action_decision",
+  "schema_version": 1,
+  "success": true,
+  "task_id": 0,
+  "task_suite": "libero_goal",
+  "video": "vla-robonix-rollout.mp4",
+  "wall_time_s": 42.64306688308716
+}
