@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "libero": [
+    {"suite": "Goal", "success_rate_pct": 75.6, "speedup": 1.54},
+    {"suite": "Object", "success_rate_pct": 72.3, "speedup": 1.49},
+    {"suite": "Spatial", "success_rate_pct": 83.7, "speedup": 1.57},
+    {"suite": "Long", "success_rate_pct": 48.8, "speedup": 1.48}
+  ],
+  "headline": {
+    "max_speedup": 1.57,
+    "best_success_rate_pct": 83.7,
+    "acceleration_over_speculative_baseline_min_pct": 27,
+    "acceleration_over_speculative_baseline_max_pct": 37
+  }
+}
