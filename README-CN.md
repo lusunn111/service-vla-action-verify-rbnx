@@ -51,17 +51,30 @@ Catalog（软件包目录）标识为 `robonix.service.vla.action_decision`，�
 ## 🎬 演示视频
 
 <div align="center">
-  <a href="docs/assets/readme/vla-validation-reel.mp4"><img width="100%" src="docs/assets/readme/vla-validation-reel.gif" alt="VLA 动作决策 Service 验证证据短片"></a>
-  <p><sub>点击动图可播放 MP4。该短片展示架构和已提交的结构化结果，不是机器人任务成功演示。</sub></p>
+  <a href="docs/assets/readme/vla-validation-reel.mp4"><img width="100%" src="docs/assets/readme/vla-validation-reel.gif" alt="由 RoboNix 驱动并成功完成的 LIBERO 回放"></a>
+  <p><sub>点击动图可播放 MP4。左侧是 1.00 倍原始动作序列，右侧把同一次真实成功回放直接加速到 1.57 倍。</sub></p>
 </div>
 
-短片由 `benchmarks/research_results/summary.json` 中的结构化项目结果、
-`benchmarks/target_server/results/summary.json` 中的 RoboNix 接入结果和仓库内架构图
-确定性生成，不包含受限的 LIBERO 观测图。复现命令如下：
+视频记录 LIBERO-Goal 第 0 个任务、第 0 个初始状态：“打开柜子的中间抽屉”。Service
+在 120 个策略步内完成任务，完整 RoboNix 链路耗时 42.64 秒。左右两侧都来自这一次
+真实成功运行；右侧只按项目最高 1.57 倍加速比直接抽帧，因此更早到达同一个成功
+终态。这是仿真演示，不是第二次计时基准，也不代表物理机器人实测。通过同一条
+RoboNix 链路运行、录制并生成左右对比：
 
 ```bash
 python -m pip install 'Pillow>=10' 'imageio>=2.34' 'imageio-ffmpeg>=0.5' 'numpy>=1.26'
-python benchmarks/target_server/render_readme_media.py
+python benchmarks/target_server/run_robonix_rollout.py \
+  --atlas 127.0.0.1:50351 \
+  --provider vla_action_decision \
+  --output-dir "$RUN_ROOT" \
+  --task-suite libero_goal --task-id 0 --initial-state 0 \
+  --max-steps 300 --fps 30
+
+python benchmarks/target_server/render_speed_comparison.py \
+  --observations "$RUN_ROOT/observations" \
+  --summary "$RUN_ROOT/summary.json" \
+  --output "$RUN_ROOT/vla-speed-comparison.mp4" \
+  --speedup 1.57 --fps 30
 ```
 
 <a id="release-results"></a>
@@ -81,6 +94,7 @@ python benchmarks/target_server/render_readme_media.py
 | 延迟模型构建 | 12.64 秒，第一次完整调用 13.98 秒 | `benchmarks/target_server/results/model_load.json` |
 | 实测 P50 加速比 | 1.034 倍，不构成显著加速 | `benchmarks/target_server/results/summary.json` |
 | 进程峰值显存 | 39,603 MiB，是 40 GB 显卡上的明确部署风险 | `benchmarks/target_server/results/summary.json` |
+| 真实仿真回放 | 120 个策略步成功完成任务 | `benchmarks/target_server/results/rollout-summary.json` |
 
 <div align="center">
   <img width="100%" src="docs/assets/readme/vla-validation-summary.webp" alt="VLA 一致性、回退、延迟和资源验证摘要">
@@ -96,7 +110,7 @@ python benchmarks/target_server/render_readme_media.py
 | 运行真实 Service | `examples/real-deployment/README.md` | RoboNix、CUDA、目标模型和 Drafter 检查点 |
 | 通过 Executor/MCP 调用 | `benchmarks/target_server/invoke_executor.py` | 已启动部署与合法本地观测图 |
 | 复现一致性与回退 | `benchmarks/target_server/run_benchmark.py` | 独立推理环境与空闲的 40 GB 级显卡 |
-| 重建 README 证据媒体 | `benchmarks/target_server/render_readme_media.py` | 只依赖已提交结构化结果 |
+| 录制并对比真实回放 | `run_robonix_rollout.py` 与 `render_speed_comparison.py` | 已启动 Service、LIBERO、检查点与空闲的 40 GB 级显卡 |
 
 ## RoboNix Service 软件包
 

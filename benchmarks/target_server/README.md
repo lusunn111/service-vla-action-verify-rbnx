@@ -75,6 +75,43 @@ python run_benchmark.py summary --output-dir results
 python render_results.py
 ```
 
+## Real RoboNix rollout video
+
+`run_robonix_rollout.py` runs a LIBERO environment while keeping policy
+inference inside the booted Service. For every policy step it writes the current
+observation under the configured local-image root, submits a one-node plan to
+Executor, validates the returned action shape, applies the candidate action to
+the simulator, and appends an annotated frame to an H.264 MP4.
+
+```bash
+export PYTHONPATH="/path/to/LIBERO:$PYTHONPATH"
+export MUJOCO_GL=egl
+
+python run_robonix_rollout.py \
+  --atlas 127.0.0.1:50351 \
+  --provider vla_action_decision \
+  --output-dir "$VALIDATION_ROOT/vla-rollout" \
+  --task-suite libero_goal --task-id 0 --initial-state 0 \
+  --wait-steps 10 --max-steps 300 --timeout-s 600 --fps 30
+```
+
+The committed demonstration completed “open the middle drawer of the cabinet”
+in 120 policy steps. Its complete RoboNix route took 42.64 seconds;
+`results/rollout-summary.json` is the sanitized summary. It is a simulator
+success, not a physical-robot result.
+
+The README comparison is deliberately simple: `render_speed_comparison.py`
+places the captured motion sequence on the left and a direct 1.57× time-scaled
+copy on the right. It does not claim two separately timed executions.
+
+```bash
+python render_speed_comparison.py \
+  --observations "$VALIDATION_ROOT/vla-rollout/observations" \
+  --summary results/rollout-summary.json \
+  --output "$VALIDATION_ROOT/vla-speed-comparison.mp4" \
+  --speedup 1.57 --fps 30
+```
+
 The committed input manifest contains only case identifiers, instructions,
 record provenance, and SHA-256 hashes. The benchmark validates functional
 parity, fallback, lazy loading, latency, GPU allocation, and cleanup; it is not

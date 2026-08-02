@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render README badges, a validation card, and a short evidence reel."""
+"""Render README result badges and cards without replacing the live demo."""
 
 from __future__ import annotations
 
@@ -167,36 +167,10 @@ def main() -> None:
     summary = json.loads(args.summary.read_text(encoding="utf-8"))
     research = json.loads(args.research_summary.read_text(encoding="utf-8"))
     args.output.mkdir(parents=True, exist_ok=True)
-    slides = [
-        base_slide(
-            args.output / "vla-action-decision-hero.webp",
-            "Speculative proposals behind a safe RoboNix capability",
-            "Drafter candidates → target-model verification → deterministic fallback → one candidate action",
-        ),
-        base_slide(
-            ROOT / "docs" / "assets" / "speculative-decoding-overview-v2.png",
-            "The Service owns verification, not physical execution",
-            "Models load on first decide; RoboNix activation stays GPU-free and the returned action remains a candidate",
-        ),
-        project_results_slide(research),
-        validation_slide(summary),
-    ]
     validation = args.output / "vla-validation-summary.webp"
-    slides[-1].save(validation, "WEBP", quality=90, method=6)
-    slides[0].save(args.output / "vla-validation-reel-poster.jpg", "JPEG", quality=90, optimize=True)
-    frames = reel_frames(slides)
-    gif_frames = [frame.resize((960, 540), Image.Resampling.LANCZOS) for frame in frames]
-    gif_frames[0].save(
-        args.output / "vla-validation-reel.gif",
-        save_all=True,
-        append_images=gif_frames[1:],
-        duration=1000 // FPS,
-        loop=0,
-        optimize=True,
-    )
-    write_video(frames, args.output / "vla-validation-reel.mp4")
+    validation_slide(summary).save(validation, "WEBP", quality=90, method=6)
     (args.output / "result-badges.svg").write_text(badge_svg(research), encoding="utf-8")
-    print(f"rendered README media in {args.output}")
+    print(f"rendered README result cards in {args.output}; live demo media was not modified")
 
 
 if __name__ == "__main__":
