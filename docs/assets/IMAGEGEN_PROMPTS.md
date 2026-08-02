@@ -45,3 +45,27 @@ All modules and arrows must stay fully inside the frame. Use large, readable san
 - The green accept path and orange fallback loop are immediately distinguishable.
 - The complete diagram remains readable when displayed at 80% README width.
 - No object, arrow, or label touches or crosses the canvas boundary.
+
+## README hero image
+
+The decorative README hero is saved as
+`docs/assets/readme/vla-action-decision-hero.webp`. It does not encode benchmark
+values or robot task-success evidence.
+
+### Built-in ImageGen regeneration prompt
+
+```text
+Use case: stylized-concept
+Asset type: wide open-source project README hero banner
+Primary request: Visualize speculative VLA action decision as a compact Drafter candidate tree entering a large target-model verification core, with a visible fallback loop and one ordered candidate action sequence leaving the system.
+Scene/backdrop: deep navy scientific computing space with subtle orbital and network geometry
+Subject: branching Drafter candidates, a dominant verification core, one fallback path, and one selected action sequence
+Style/medium: premium cinematic scientific visualization, technically credible, polished 3D particles and fine data lines
+Composition/framing: 2.5:1 wide banner; proposal tree on the left, target verification in the center, selected action nodes on the right; keep all important content inside safe margins
+Lighting/mood: precise, calm, trustworthy, blue and cyan illumination with restrained warm accents for fallback
+Color palette: dark navy, cyan, electric blue, small amber fallback accents
+Constraints: no text, no logos, no people, no robot task scene, no performance numbers, no watermark, no cropped key elements
+```
+
+Generation mode: Codex built-in `imagegen`; the selected source was copied
+into this repository and resized to a 1600×640 WebP for README delivery.

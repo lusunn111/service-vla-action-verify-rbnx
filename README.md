@@ -1,18 +1,25 @@
+<!-- Written as HTML rather than Markdown inside the centering div on purpose:
+     the RoboNix package catalog uses Python-Markdown and otherwise publishes
+     Markdown nested in block-level HTML as literal source text. -->
 <div align="center">
-
-# RoboNix VLA Action Decision Service
-
-**A system-level action decision, speculative verification, and target-model fallback Service for embodied models**
-
-[中文文档](README-CN.md) · [🚀 Quick Start](#quick-start) · [⚙️ Requirements](#requirements) · [🧪 Validation](#validated-release) · [📝 Citation](#citation)
-
-![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
-![PyTorch](https://img.shields.io/badge/PyTorch-2.2-EE4C2C?logo=pytorch&logoColor=white)
-![CUDA](https://img.shields.io/badge/CUDA-12.1-76B900?logo=nvidia&logoColor=white)
-![LIBERO](https://img.shields.io/badge/LIBERO-rollout_verified-1f9d72)
-[![License](https://img.shields.io/badge/license-MulanPSL--2.0-red)](LICENSE)
-[![GitHub Stars](https://img.shields.io/github/stars/lusunn111/service-vla-action-decision-rbnx?style=flat&logo=github)](https://github.com/lusunn111/service-vla-action-decision-rbnx/stargazers)
-
+  <p><strong>This RoboNix Service is provided and maintained by Prof. Xiang Chen's group (<a href="https://if-lab-pku.github.io/">IFLab</a>), School of Computer Science, Peking University.</strong></p>
+  <h1>RoboNix VLA Action Decision Service</h1>
+  <p><strong>Speculative VLA inference with lazy GPU loading, target-model verification, and deterministic fallback.</strong></p>
+  <p>
+    <a href="README-CN.md">简体中文</a> ·
+    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx#what-this-adds">What this adds</a> ·
+    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx#demo-video">Demo Video</a> ·
+    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx#release-results">Release results</a> ·
+    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx#quick-start">Quick Start</a> ·
+    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx#citation">Citation</a>
+  </p>
+  <p>
+    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx/actions/workflows/ci.yml"><img src="https://github.com/lusunn111/service-vla-action-decision-rbnx/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MulanPSL--2.0-red" alt="MulanPSL-2.0 license"></a>
+    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx/stargazers"><img src="https://img.shields.io/github/stars/lusunn111/service-vla-action-decision-rbnx?style=flat&amp;logo=github" alt="GitHub stars"></a>
+  </p>
+  <p><img width="100%" src="docs/assets/readme/vla-action-decision-hero.webp" alt="Drafter candidates flowing through target-model verification and fallback into one candidate action"></p>
+  <p><a href="https://github.com/lusunn111/service-vla-action-decision-rbnx#performance-snapshot"><img width="92%" src="docs/assets/readme/result-badges.svg" alt="1.57 times peak speedup, 83.7 percent best success rate, and 27 to 37 percent gain over the speculative baseline"></a></p>
 </div>
 
 The **RoboNix VLA Action Decision Service** lets
@@ -22,6 +29,81 @@ acceptance, motion compensation, and policy fallback reduce repeated large-model
 inference while preserving task-level reliability. The research implementation currently supports
 OpenVLA with Drafter-based proposals, parallel verification, motion-aware
 compensation, and original-policy fallback.
+Across the four LIBERO suites, the complete project reaches up to **1.57×**
+end-to-end speedup and **83.7%** task success, with **27%–37%** acceleration
+over the speculative baseline.
+
+<a id="what-this-adds"></a>
+## 🎯 What this adds to RoboNix
+
+This repository packages the target OpenVLA and Drafter inference path behind
+one lifecycle-aware RoboNix capability. The Service owns model loading,
+speculative verification, target-only recovery, output validation, and cleanup;
+task orchestration and physical execution remain outside the provider.
+
+| RoboNix gets | Concrete behavior |
+| --- | --- |
+| One action-decision capability | `decide` accepts an instruction and one validated local observation, then returns one candidate action and its inference mode. |
+| GPU-safe activation | `rbnx boot` does not import PyTorch or allocate model memory; both checkpoints load on the first real call. |
+| Deterministic recovery | Drafter/speculative failure calls the already-loaded target model; only a target-model failure makes the capability call fail. |
+| A self-contained inference implementation | Service inference source ships in the Wheel; model weights remain external deployment assets. |
+| A hardware safety boundary | The Service returns a candidate action only. It never sends robot commands or owns the execution loop. |
+| Reproducible full-chain evidence | 10 real LIBERO-Goal observations produced 30 Executor/MCP calls with maximum action error `0.0` against direct speculative inference. |
+
+The catalog identity is `robonix.service.vla.action_decision`; the public
+contract is `robonix/service/vla/action_decision/decide`.
+
+<a id="demo-video"></a>
+## 🎬 Demo Video
+
+<div align="center">
+  <a href="docs/assets/readme/vla-validation-reel.mp4"><img width="100%" src="docs/assets/readme/vla-validation-reel.gif" alt="VLA Action Decision Service validation evidence reel"></a>
+  <p><sub>Click the animation to play the MP4. This reel visualizes the architecture and committed structured results; it is not a robot task-success demo.</sub></p>
+</div>
+
+The reel is deterministically generated from the structured project results in
+`benchmarks/research_results/summary.json`, the RoboNix integration results in
+`benchmarks/target_server/results/summary.json`, and committed architecture
+assets. It contains no restricted LIBERO observation image. Regenerate it with:
+
+```bash
+python -m pip install 'Pillow>=10' 'imageio>=2.34' 'imageio-ffmpeg>=0.5' 'numpy>=1.26'
+python benchmarks/target_server/render_readme_media.py
+```
+
+<a id="release-results"></a>
+## ⚡ RoboNix release results
+
+Release candidate 0.1.0 was exercised through the real path
+`Executor → Atlas → MCP → Service → packaged inference → external checkpoints`,
+rather than by importing the provider class directly.
+
+| Release evidence | Measured value | Structured source |
+| --- | ---: | --- |
+| Real inputs | 10 LIBERO-Goal observations | `benchmarks/target_server/input_manifest.json` |
+| Full-chain parity | 30 calls, maximum action error 0.0 | `benchmarks/target_server/results/summary.json` |
+| Executor/MCP latency | P50 182.88 ms, P95 212.10 ms | `benchmarks/target_server/results/calls.csv` |
+| Service wrapping cost | P50 9.88 ms | `benchmarks/target_server/results/summary.json` |
+| Target-model fallback | Verified by real post-load Drafter fault injection | `benchmarks/target_server/results/fallback.json` |
+| Lazy model construction | 12.64 s; first full call 13.98 s | `benchmarks/target_server/results/model_load.json` |
+| Measured P50 speedup | 1.034×, not a material speedup | `benchmarks/target_server/results/summary.json` |
+| Peak process GPU allocation | 39,603 MiB, an explicit 40 GB deployment risk | `benchmarks/target_server/results/summary.json` |
+
+<div align="center">
+  <img width="100%" src="docs/assets/readme/vla-validation-summary.webp" alt="Validated VLA parity, fallback, latency, and resource summary">
+  <p><sub><strong>Figure 1.</strong> Real release validation. Correctness and fallback are verified; this deployment does not establish a material speculative speedup.</sub></p>
+</div>
+
+### Start by goal
+
+| Goal | Entry point | Required resources |
+| --- | --- | --- |
+| Verify the package contract | `python -m pytest -q && python scripts/release_audit.py` | CPU only |
+| Run a mock RoboNix deployment | `examples/minimal-deployment/README.md` | CPU only; no checkpoints |
+| Run the real Service | `examples/real-deployment/README.md` | RoboNix, CUDA, target checkpoint, and Drafter checkpoint |
+| Invoke through Executor/MCP | `benchmarks/target_server/invoke_executor.py` | A booted deployment and a valid local observation |
+| Reproduce parity and fallback | `benchmarks/target_server/run_benchmark.py` | An isolated inference environment and free 40 GB-class GPU |
+| Rebuild README evidence media | `benchmarks/target_server/render_readme_media.py` | Committed structured results only |
 
 ## RoboNix Service package
 
@@ -116,10 +198,11 @@ dual failure fails the MCP call. The local observation must remain below
 Configuration fields and defaults are defined in [config.spec](config.spec).
 
 <a id="performance-snapshot"></a>
-## 📊 Performance Snapshot
+## 📊 Performance snapshot
 
-The motion-aware verification and recovery path improves end-to-end execution
-speed while preserving task-level reliability across all four LIBERO suites.
+The project evaluates motion-aware verification and recovery across all four
+LIBERO suites. Results report task success rate (SR) and end-to-end speedup
+over the naive speculative VLA path.
 
 | LIBERO suite | SR | Speedup |
 | --- | ---: | ---: |
@@ -130,8 +213,11 @@ speed while preserving task-level reliability across all four LIBERO suites.
 
 ## 📚 Table of Contents
 
+- [What this adds to RoboNix](#what-this-adds)
+- [Demo Video](#demo-video)
+- [RoboNix release results](#release-results)
 - [Real RoboNix deployment](#real-robonix-deployment)
-- [📊 Performance Snapshot](#performance-snapshot)
+- [📊 Performance snapshot](#performance-snapshot)
 - [📰 News](#news)
 - [⚡ System Capability and Results](#system-results)
 - [🧠 Architecture Overview](#architecture)
@@ -142,6 +228,7 @@ speed while preserving task-level reliability across all four LIBERO suites.
 - [🧰 Installation and Configuration](#installation)
 - [🏋️ Drafter Training](#training)
 - [🎬 LIBERO Rollout](#rollout)
+- [🩺 Troubleshooting](#troubleshooting)
 - [🗺️ Roadmap](#roadmap)
 - [📝 Citation](#citation)
 - [🤝 Contributors](#contributors)
@@ -191,7 +278,7 @@ The original SVG is retained as an editable fallback.
 
 <div align="center">
   <img width="96%" alt="RoboNix speculative decoding architecture" src="docs/assets/speculative-decoding-overview-v2.png" />
-  <p><b>Figure 1.</b> Offline Drafter preparation and online speculative execution with confidence, kinematic acceptance, and target-policy fallback.</p>
+  <p><b>Figure 2.</b> Offline Drafter preparation and online speculative execution with confidence, kinematic acceptance, and target-policy fallback.</p>
 </div>
 
 Unlike fully autoregressive decoding, speculative decoding uses a smaller draft model to propose multiple candidates before invoking the target model. The target model validates these candidates in parallel. Actual speedup depends on the acceptance rate, candidate-tree shape, GPU, model configuration, and task, and must be measured against an autoregressive baseline under identical conditions.
@@ -203,7 +290,7 @@ This Service is an independently deployable RoboNix provider connected through s
 
 <div align="center">
   <img width="96%" alt="RoboNix system architecture" src="docs/assets/robonix-system-architecture.png" />
-  <p><b>Figure 2.</b> System-level integration points for reusable memory services, custom services, and VLA-based user skills.</p>
+  <p><b>Figure 3.</b> System-level integration points for reusable memory services, custom services, and VLA-based user skills.</p>
 </div>
 
 Looking forward, the same interface can support additional Drafters, physical constraints, verification policies, and online data feedback. The long-term goal is a reusable embodied-execution service whose algorithms can evolve independently from robot hardware and the RoboNix runtime.
@@ -503,6 +590,56 @@ Do not report model-forward latency as end-to-end latency. Image preprocessing, 
 `vendor/openvla/` is the canonical compatibility copy. The top-level `modules/`, `scripts/`, and `benchmarks/` directories provide an engineering-oriented view of the implementation. When changing an algorithm, clearly identify the authoritative layer and keep any convenience copies synchronized.
 
 The default strategy is `modules.strategies.modeling_speculation`. The `_1`, `_14`, `_7d`, `_jiou`, and `_yuzhi` variants represent distinct research experiments and intentionally remain separate.
+
+<a id="troubleshooting"></a>
+## 🩺 Troubleshooting
+
+### `rbnx boot` shows no GPU allocation
+
+That is the intended lifecycle. Activation registers the capability without
+importing PyTorch; target and Drafter checkpoints load on the first `decide`.
+Use `rbnx caps`, `rbnx tools`, and `rbnx describe` to verify registration before
+issuing the first model request.
+
+### The first request is much slower than later requests
+
+The first request includes inference-stack import, checkpoint construction, and
+GPU allocation. Measure cold start separately from steady-state latency. Do not
+average the first call into warm P50/P95 results without saying so.
+
+### The process exhausts a 40 GB GPU
+
+Check both model allocation and framework-level reservation. The validated
+environment observed TensorFlow preprocessing reserve most remaining memory,
+raising process allocation to 39,603 MiB. Use an isolated GPU, avoid colocating
+another model, and inspect process ownership before terminating anything.
+
+### Drafter inference fails
+
+The Service should reuse the loaded target model and return
+`mode=target_fallback` with `fallback_used=true`. If the entire MCP call fails,
+inspect whether the target path also failed. Fault injection belongs in the
+benchmark harness; production requests do not expose a test switch.
+
+### The observation is rejected before model loading
+
+Resolve the path and verify that it stays below `allowed_image_root`. The image
+must pass signature, byte-size, and pixel-count checks. Network URLs are not
+accepted in version 0.1.0, so download and validate an observation outside the
+Service before placing it in the configured input directory.
+
+### Direct inference and MCP actions differ
+
+Lock the same checkpoint, Drafter state, preprocessing configuration,
+instruction, image bytes, and random state. Compare the seven action values
+before simulator execution. If the speculative path failed previously, clear
+its candidate-tree state before evaluating target-only fallback.
+
+### Cleanup after validation
+
+Use `rbnx shutdown -f robonix_manifest.yaml`, confirm the provider process has
+exited, and then check the selected GPU. Only terminate processes started by
+this deployment; a shared GPU or runtime may host unrelated experiments.
 
 <a id="roadmap"></a>
 ## 🗺️ Roadmap

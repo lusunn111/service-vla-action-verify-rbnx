@@ -1,24 +1,102 @@
+<!-- 居中块内有意全部使用 HTML：RoboNix 软件包目录使用 Python-Markdown，
+     若在块级 HTML 中混写 Markdown，会把标题和徽章作为原始文本发布。 -->
 <div align="center">
-
-# RoboNix VLA 动作决策 Service
-
-**面向具身模型的系统级动作决策、推测校验与目标模型回退 Service（服务）**
-
-[English](README.md) · [🚀 快速开始](#quick-start) · [⚙️ 环境要求](#requirements) · [🧪 验证结果](#validated-release) · [📝 引用](#citation)
-
-![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
-![PyTorch](https://img.shields.io/badge/PyTorch-2.2-EE4C2C?logo=pytorch&logoColor=white)
-![CUDA](https://img.shields.io/badge/CUDA-12.1-76B900?logo=nvidia&logoColor=white)
-![LIBERO](https://img.shields.io/badge/LIBERO-rollout_verified-1f9d72)
-[![License](https://img.shields.io/badge/license-MulanPSL--2.0-red)](LICENSE)
-[![GitHub Stars](https://img.shields.io/github/stars/lusunn111/service-vla-action-decision-rbnx?style=flat&logo=github)](https://github.com/lusunn111/service-vla-action-decision-rbnx/stargazers)
-
+  <p><strong>本 RoboNix Service 由北京大学计算机学院陈翔老师课题组（<a href="https://if-lab-pku.github.io/">IFLab</a>）提供并维护。</strong></p>
+  <h1>RoboNix VLA 动作决策 Service</h1>
+  <p><strong>具备 GPU 延迟加载、目标模型校验和确定性回退的 VLA 推测推理能力。</strong></p>
+  <p>
+    <a href="README.md">English</a> ·
+    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx/blob/main/README-CN.md#what-this-adds">带来了什么</a> ·
+    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx/blob/main/README-CN.md#demo-video">演示视频</a> ·
+    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx/blob/main/README-CN.md#release-results">发布结果</a> ·
+    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx/blob/main/README-CN.md#quick-start">快速开始</a> ·
+    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx/blob/main/README-CN.md#citation">引用</a>
+  </p>
+  <p>
+    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx/actions/workflows/ci.yml"><img src="https://github.com/lusunn111/service-vla-action-decision-rbnx/actions/workflows/ci.yml/badge.svg" alt="持续集成状态"></a>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/license-MulanPSL--2.0-red" alt="木兰宽松许可证 2.0"></a>
+    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx/stargazers"><img src="https://img.shields.io/github/stars/lusunn111/service-vla-action-decision-rbnx?style=flat&amp;logo=github" alt="GitHub 收藏数"></a>
+  </p>
+  <p><img width="100%" src="docs/assets/readme/vla-action-decision-hero.webp" alt="Drafter 候选经过目标模型校验与回退形成单个候选动作"></p>
+  <p><a href="https://github.com/lusunn111/service-vla-action-decision-rbnx/blob/main/README-CN.md#performance-snapshot"><img width="92%" src="docs/assets/readme/result-badges.svg" alt="最高 1.57 倍加速、最高 83.7% 成功率、相对推测基线提升 27% 到 37%"></a></p>
 </div>
 
 **RoboNix VLA 动作决策 Service** 面向现有 VLA（视觉语言动作模型），让
 低成本候选动作经过目标模型与运动先验共同校验后再进入执行。系统通过自适应接受、
 运动补偿和策略回退减少重复的大模型推理，同时保持任务级执行可靠性。当前已支持
 OpenVLA，以及 Drafter 候选生成、并行验证、运动感知补偿和原策略回退。
+在四类 LIBERO 套件上，完整项目最高达到 **1.57 倍**端到端加速和 **83.7%**
+任务成功率，相对推测基线提升 **27%–37%**。
+
+<a id="what-this-adds"></a>
+## 🎯 这个 Service 给 RoboNix 带来了什么
+
+本仓库把目标 OpenVLA 与 Drafter 推理链路整理到一个具备完整生命周期的 RoboNix
+能力中。Service 负责模型加载、推测校验、目标模型恢复、输出校验和资源清理；任务
+编排和物理动作执行仍位于能力提供方之外。
+
+| RoboNix 获得的能力 | 具体行为 |
+| --- | --- |
+| 单一动作决策接口 | `decide` 接收指令和一张经过校验的本地观测图，返回一个候选动作及其推理模式。 |
+| GPU 安全激活 | `rbnx boot` 不导入 PyTorch，也不分配模型显存；第一次真实调用才加载两个检查点。 |
+| 确定性的恢复路径 | Drafter 或推测路径失败后调用已加载的目标模型；只有目标模型也失败才令能力调用失败。 |
+| 仓库自包含的推理实现 | Wheel（Python 二进制分发包）包含 Service 推理源码，模型权重继续作为外部部署资产。 |
+| 硬件安全边界 | Service 只返回候选动作，不发送机器人指令，也不负责执行闭环。 |
+| 可复现的全链路证据 | 10 个真实 LIBERO-Goal 观测完成 30 次 Executor/MCP 调用，相对直接推测推理的最大动作误差为 `0.0`。 |
+
+Catalog（软件包目录）标识为 `robonix.service.vla.action_decision`，公开契约为
+`robonix/service/vla/action_decision/decide`。
+
+<a id="demo-video"></a>
+## 🎬 演示视频
+
+<div align="center">
+  <a href="docs/assets/readme/vla-validation-reel.mp4"><img width="100%" src="docs/assets/readme/vla-validation-reel.gif" alt="VLA 动作决策 Service 验证证据短片"></a>
+  <p><sub>点击动图可播放 MP4。该短片展示架构和已提交的结构化结果，不是机器人任务成功演示。</sub></p>
+</div>
+
+短片由 `benchmarks/research_results/summary.json` 中的结构化项目结果、
+`benchmarks/target_server/results/summary.json` 中的 RoboNix 接入结果和仓库内架构图
+确定性生成，不包含受限的 LIBERO 观测图。复现命令如下：
+
+```bash
+python -m pip install 'Pillow>=10' 'imageio>=2.34' 'imageio-ffmpeg>=0.5' 'numpy>=1.26'
+python benchmarks/target_server/render_readme_media.py
+```
+
+<a id="release-results"></a>
+## ⚡ RoboNix 发布结果
+
+0.1.0 发布候选版本通过真实的
+`Executor → Atlas → MCP → Service → 仓库内推理源码 → 外部检查点` 路径完成验收，
+没有用直接导入 Service 类代替 RoboNix 调用。
+
+| 发布证据 | 实测值 | 结构化来源 |
+| --- | ---: | --- |
+| 真实输入 | 10 个 LIBERO-Goal 观测 | `benchmarks/target_server/input_manifest.json` |
+| 全链路一致性 | 30 次调用，最大动作误差 0.0 | `benchmarks/target_server/results/summary.json` |
+| Executor/MCP 延迟 | P50 182.88 ms，P95 212.10 ms | `benchmarks/target_server/results/calls.csv` |
+| Service 包装开销 | P50 9.88 ms | `benchmarks/target_server/results/summary.json` |
+| 目标模型回退 | 模型加载后注入真实 Drafter 故障并验证 | `benchmarks/target_server/results/fallback.json` |
+| 延迟模型构建 | 12.64 秒，第一次完整调用 13.98 秒 | `benchmarks/target_server/results/model_load.json` |
+| 实测 P50 加速比 | 1.034 倍，不构成显著加速 | `benchmarks/target_server/results/summary.json` |
+| 进程峰值显存 | 39,603 MiB，是 40 GB 显卡上的明确部署风险 | `benchmarks/target_server/results/summary.json` |
+
+<div align="center">
+  <img width="100%" src="docs/assets/readme/vla-validation-summary.webp" alt="VLA 一致性、回退、延迟和资源验证摘要">
+  <p><sub><strong>图 1.</strong> 真实发布验收结果。一致性与回退已经验证，但本次部署没有证明显著的推测加速。</sub></p>
+</div>
+
+### 按目标开始
+
+| 目标 | 入口 | 所需资源 |
+| --- | --- | --- |
+| 检查软件包契约 | `python -m pytest -q && python scripts/release_audit.py` | 仅 CPU |
+| 运行模拟 RoboNix 部署 | `examples/minimal-deployment/README.md` | 仅 CPU，不需要检查点 |
+| 运行真实 Service | `examples/real-deployment/README.md` | RoboNix、CUDA、目标模型和 Drafter 检查点 |
+| 通过 Executor/MCP 调用 | `benchmarks/target_server/invoke_executor.py` | 已启动部署与合法本地观测图 |
+| 复现一致性与回退 | `benchmarks/target_server/run_benchmark.py` | 独立推理环境与空闲的 40 GB 级显卡 |
+| 重建 README 证据媒体 | `benchmarks/target_server/render_readme_media.py` | 只依赖已提交结构化结果 |
 
 ## RoboNix Service 软件包
 
@@ -109,8 +187,8 @@ rbnx shutdown -f robonix_manifest.yaml
 <a id="performance-snapshot"></a>
 ## 📊 效果概览
 
-运动感知校验与恢复链路在四个 LIBERO 套件上提升了端到端执行速度，同时保持
-任务级执行可靠性。
+项目在四类 LIBERO 套件上评测了运动感知校验与恢复。下表展示任务成功率（SR）
+以及相对朴素推测 VLA 路径的端到端加速比。
 
 | LIBERO 套件 | 成功率 | 加速比 |
 | --- | ---: | ---: |
@@ -121,6 +199,9 @@ rbnx shutdown -f robonix_manifest.yaml
 
 ## 📚 目录
 
+- [这个 Service 给 RoboNix 带来了什么](#what-this-adds)
+- [演示视频](#demo-video)
+- [RoboNix 发布结果](#release-results)
 - [真实 RoboNix 部署](#real-robonix-deployment)
 - [📊 效果概览](#performance-snapshot)
 - [📰 最新进展](#news)
@@ -133,6 +214,7 @@ rbnx shutdown -f robonix_manifest.yaml
 - [📦 检查点来源](#checkpoints)
 - [🎬 LIBERO Rollout](#rollout)
 - [🏋️ Drafter 训练](#training)
+- [🩺 常见问题](#troubleshooting)
 - [🗺️ 路线图](#roadmap)
 - [📝 引用](#citation)
 - [🤝 贡献者](#contributors)
@@ -179,7 +261,7 @@ IMAGEGEN ASSET
 
 <div align="center">
   <img width="96%" alt="RoboNix 推测解码架构" src="docs/assets/speculative-decoding-overview-v2.png" />
-  <p><b>图 1.</b> 离线 Drafter 准备，以及包含置信度、运动学接受和目标策略回退的在线推测执行链路。</p>
+  <p><b>图 2.</b> 离线 Drafter 准备，以及包含置信度、运动学接受和目标策略回退的在线推测执行链路。</p>
 </div>
 
 推测解码的系统收益不只取决于模型前向时间，还取决于候选接受率、候选树形状、
@@ -193,7 +275,7 @@ IMAGEGEN ASSET
 
 <div align="center">
   <img width="96%" alt="RoboNix 系统架构" src="docs/assets/robonix-system-architecture.png" />
-  <p><b>图 2.</b> 可复用记忆服务、自定义服务与基于 VLA 的用户技能在 RoboNix 中的系统级接入位置。</p>
+  <p><b>图 3.</b> 可复用记忆服务、自定义服务与基于 VLA 的用户技能在 RoboNix 中的系统级接入位置。</p>
 </div>
 
 未来可以在统一接口下继续扩展不同 Drafter、物理约束、验证策略和在线数据回流机制，使具身执行算法能够独立于机器人硬件和 RoboNix 核心持续演进。
@@ -337,8 +419,51 @@ bash train_ds_libero_goal.sh
 └── service_bootstrap.py      # 原始代码激活与安全脚本分发
 ```
 
-`vendor/openvla/` 是论文行为的权威实现，`modules/` 与 `scripts/` 提供便于服务化
+`vendor/openvla/` 是项目算法行为的权威实现，`modules/` 与 `scripts/` 提供便于服务化
 和后续接入 RoboNix 的工程视图。
+
+<a id="troubleshooting"></a>
+## 🩺 常见问题
+
+### `rbnx boot` 后没有显存占用
+
+这是预期生命周期。激活阶段只注册能力，不导入 PyTorch；目标模型与 Drafter 在
+第一次 `decide` 时加载。第一次模型调用前应先用 `rbnx caps`、`rbnx tools` 和
+`rbnx describe` 检查能力注册。
+
+### 第一次请求明显慢于后续请求
+
+第一次请求包含推理依赖导入、检查点构建和显存分配。冷启动必须与稳定阶段延迟
+分别统计，不能在不说明的情况下把第一次调用混入热调用 P50/P95。
+
+### 40 GB 显卡出现显存不足
+
+需要同时检查模型真实分配和框架级预留。已验证环境中的 TensorFlow 预处理会预留
+大部分剩余显存，使进程级占用达到 39,603 MiB。应使用独立 GPU，避免与其他模型
+共置，并在停止进程前先核对进程所有者。
+
+### Drafter 推理失败
+
+Service 应复用已加载的目标模型，返回 `mode=target_fallback` 和
+`fallback_used=true`。如果整个 MCP 调用失败，需要继续检查目标模型路径是否也
+失败。故障注入只能放在基准框架中，生产接口不暴露测试开关。
+
+### 观测图在模型加载前被拒绝
+
+解析路径并确认它仍位于 `allowed_image_root` 下。图片必须通过文件签名、字节大小
+和像素数量校验。0.1.0 不接受网络 URL；应在 Service 外部完成下载和校验，再把
+图片放入配置的输入目录。
+
+### 直接推理与 MCP 动作不同
+
+需要固定相同检查点、Drafter 状态、预处理配置、指令、图像字节和随机状态，并在
+仿真执行前直接比较 7 维动作。如果推测路径此前失败过，测试目标模型回退前必须
+清除候选树状态。
+
+### 验收结束后如何清理
+
+执行 `rbnx shutdown -f robonix_manifest.yaml`，确认 Service 进程退出，再检查选定
+GPU。只能停止本次部署启动的进程，共享 GPU 或运行时可能承载其他实验。
 
 <a id="roadmap"></a>
 ## 🗺️ 路线图
