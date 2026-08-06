@@ -1,8 +1,8 @@
 manifestVersion: 1
-name: vla-action-decision-real-validation
+name: vla-action-verify-real-validation
 
 catalog:
-  name: robonix.robot.testing.vla_action_decision_real
+  name: robonix.robot.testing.vla_action_verify_real
   version: 0.1.0
   description: Service-only deployment for real OpenVLA and Drafter validation.
   license: MulanPSL-2.0
@@ -15,7 +15,7 @@ system:
   executor: { listen: 127.0.0.1:50361, log: info }
 
 service:
-  - name: vla_action_decision
+  - name: vla_action_verify
     path: ../..
     config:
       backend_mode: openvla

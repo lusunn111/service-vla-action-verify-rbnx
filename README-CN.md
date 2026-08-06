@@ -6,19 +6,19 @@
   <p><strong>具备 GPU 延迟加载、目标模型校验和确定性回退的 VLA 推测推理能力。</strong></p>
   <p>
     <a href="README.md">English</a> ·
-    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx/blob/main/README-CN.md#what-this-adds">带来了什么</a> ·
-    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx/blob/main/README-CN.md#demo-video">演示视频</a> ·
-    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx/blob/main/README-CN.md#release-results">发布结果</a> ·
-    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx/blob/main/README-CN.md#quick-start">快速开始</a> ·
-    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx/blob/main/README-CN.md#citation">引用</a>
+    <a href="https://github.com/lusunn111/service-vla-action-verify-rbnx/blob/main/README-CN.md#what-this-adds">带来了什么</a> ·
+    <a href="https://github.com/lusunn111/service-vla-action-verify-rbnx/blob/main/README-CN.md#demo-video">演示视频</a> ·
+    <a href="https://github.com/lusunn111/service-vla-action-verify-rbnx/blob/main/README-CN.md#release-results">发布结果</a> ·
+    <a href="https://github.com/lusunn111/service-vla-action-verify-rbnx/blob/main/README-CN.md#quick-start">快速开始</a> ·
+    <a href="https://github.com/lusunn111/service-vla-action-verify-rbnx/blob/main/README-CN.md#citation">引用</a>
   </p>
   <p>
-    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx/actions/workflows/ci.yml"><img src="https://github.com/lusunn111/service-vla-action-decision-rbnx/actions/workflows/ci.yml/badge.svg" alt="持续集成状态"></a>
+    <a href="https://github.com/lusunn111/service-vla-action-verify-rbnx/actions/workflows/ci.yml"><img src="https://github.com/lusunn111/service-vla-action-verify-rbnx/actions/workflows/ci.yml/badge.svg" alt="持续集成状态"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-MulanPSL--2.0-red" alt="木兰宽松许可证 2.0"></a>
-    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx/stargazers"><img src="https://img.shields.io/github/stars/lusunn111/service-vla-action-decision-rbnx?style=flat&amp;logo=github" alt="GitHub 收藏数"></a>
+    <a href="https://github.com/lusunn111/service-vla-action-verify-rbnx/stargazers"><img src="https://img.shields.io/github/stars/lusunn111/service-vla-action-verify-rbnx?style=flat&amp;logo=github" alt="GitHub 收藏数"></a>
   </p>
-  <p><img width="100%" src="docs/assets/readme/vla-action-decision-hero.webp" alt="Drafter 候选经过目标模型校验与回退形成单个候选动作"></p>
-  <p><a href="https://github.com/lusunn111/service-vla-action-decision-rbnx/blob/main/README-CN.md#performance-snapshot"><img width="92%" src="docs/assets/readme/result-badges.svg" alt="最高 1.57 倍加速、最高 83.7% 成功率、相对推测基线提升 27% 到 37%"></a></p>
+  <p><img width="100%" src="docs/assets/readme/vla-action-verify-hero.webp" alt="Drafter 候选经过目标模型校验与回退形成单个候选动作"></p>
+  <p><a href="https://github.com/lusunn111/service-vla-action-verify-rbnx/blob/main/README-CN.md#performance-snapshot"><img width="92%" src="docs/assets/readme/result-badges.svg" alt="最高 1.57 倍加速、最高 83.7% 成功率、相对推测基线提升 27% 到 37%"></a></p>
 </div>
 
 **RoboNix VLA 动作决策 Service** 面向现有 VLA（视觉语言动作模型），让
@@ -37,15 +37,15 @@ OpenVLA，以及 Drafter 候选生成、并行验证、运动感知补偿和原�
 
 | RoboNix 获得的能力 | 具体行为 |
 | --- | --- |
-| 单一动作决策接口 | `decide` 接收指令和一张经过校验的本地观测图，返回一个候选动作及其推理模式。 |
+| 单一动作决策接口 | `verify` 接收指令和一张经过校验的本地观测图，返回一个候选动作及其推理模式。 |
 | GPU 安全激活 | `rbnx boot` 不导入 PyTorch，也不分配模型显存；第一次真实调用才加载两个检查点。 |
 | 确定性的恢复路径 | Drafter 或推测路径失败后调用已加载的目标模型；只有目标模型也失败才令能力调用失败。 |
 | 仓库自包含的推理实现 | Wheel（Python 二进制分发包）包含 Service 推理源码，模型权重继续作为外部部署资产。 |
 | 硬件安全边界 | Service 只返回候选动作，不发送机器人指令，也不负责执行闭环。 |
 | 可复现的全链路证据 | 10 个真实 LIBERO-Goal 观测完成 30 次 Executor/MCP 调用，相对直接推测推理的最大动作误差为 `0.0`。 |
 
-Catalog（软件包目录）标识为 `robonix.service.vla.action_decision`，公开契约为
-`robonix/service/vla/action_decision/decide`。
+Catalog（软件包目录）标识为 `robonix.service.vla.action_verify`，公开契约为
+`robonix/service/vla/action_verify/verify`。
 
 <a id="demo-video"></a>
 ## 🎬 演示视频
@@ -65,7 +65,7 @@ RoboNix 链路运行、录制并生成左右对比：
 python -m pip install 'Pillow>=10' 'imageio>=2.34' 'imageio-ffmpeg>=0.5' 'numpy>=1.26'
 python benchmarks/target_server/run_robonix_rollout.py \
   --atlas 127.0.0.1:50351 \
-  --provider vla_action_decision \
+  --provider vla_action_verify \
   --output-dir "$RUN_ROOT" \
   --task-suite libero_goal --task-id 0 --initial-state 0 \
   --max-steps 300 --fps 30
@@ -114,8 +114,8 @@ python benchmarks/target_server/render_speed_comparison.py \
 
 ## RoboNix Service 软件包
 
-仓库根目录可以直接作为 `robonix.service.vla.action_decision` 发布，对外提供
-`robonix/service/vla/action_decision/decide`。Service 只返回候选动作，不控制
+仓库根目录可以直接作为 `robonix.service.vla.action_verify` 发布，对外提供
+`robonix/service/vla/action_verify/verify`。Service 只返回候选动作，不控制
 机器人硬件。RoboNix 激活阶段不会导入 PyTorch 或占用 GPU，目标模型与 Drafter
 在第一次真实请求时延迟加载。
 
@@ -147,7 +147,7 @@ OpenVLA/SpecVLA 推理源码，模型检查点仍作为部署输入，不进入 
 
 ```text
 Executor（执行器）-> Atlas（能力注册中心）-> MCP（模型上下文协议）
--> vla_action_decision -> 仓库自带 OpenVLA/SpecVLA 推理源码 -> 外部检查点
+-> vla_action_verify -> 仓库自带 OpenVLA/SpecVLA 推理源码 -> 外部检查点
 ```
 
 该能力只返回一个候选动作，绝不直接控制机器人硬件。已有检查点和观测数据应从
@@ -175,7 +175,7 @@ rbnx build -f robonix_manifest.yaml
 rbnx boot -v --no-update-check -f robonix_manifest.yaml
 rbnx caps -v --server 127.0.0.1:50351
 rbnx tools --server 127.0.0.1:50351
-rbnx describe --server 127.0.0.1:50351 --provider vla_action_decision
+rbnx describe --server 127.0.0.1:50351 --provider vla_action_verify
 rbnx inspect --server 127.0.0.1:50351
 ```
 
@@ -185,15 +185,15 @@ rbnx inspect --server 127.0.0.1:50351
 ```bash
 python ../../benchmarks/target_server/invoke_executor.py \
   --atlas 127.0.0.1:50351 \
-  --provider vla_action_decision \
-  --contract robonix/service/vla/action_decision/decide \
+  --provider vla_action_verify \
+  --contract robonix/service/vla/action_verify/verify \
   --args-json '{"instruction":"pick up the bowl","observation_uri":"/absolute/input/observation.jpg","timeout_s":600}' \
   --timeout-s 900
 
 rbnx shutdown -f robonix_manifest.yaml
 ```
 
-第一次 `decide` 才导入推理依赖并加载两个模型。推测执行失败后会调用已加载的
+第一次 `verify` 才导入推理依赖并加载两个模型。推测执行失败后会调用已加载的
 目标模型，只有二者都失败才令 MCP 调用失败。观测图片必须位于
 `allowed_image_root` 内，并通过签名、大小和像素数校验。全部配置字段和默认值
 见 [config.spec](config.spec)。
@@ -442,7 +442,7 @@ bash train_ds_libero_goal.sh
 ### `rbnx boot` 后没有显存占用
 
 这是预期生命周期。激活阶段只注册能力，不导入 PyTorch；目标模型与 Drafter 在
-第一次 `decide` 时加载。第一次模型调用前应先用 `rbnx caps`、`rbnx tools` 和
+第一次 `verify` 时加载。第一次模型调用前应先用 `rbnx caps`、`rbnx tools` 和
 `rbnx describe` 检查能力注册。
 
 ### 第一次请求明显慢于后续请求
@@ -498,12 +498,12 @@ GPU。只能停止本次部署启动的进程，共享 GPU 或运行时可能承
 如果该 Service 对你的研究有帮助，欢迎给仓库一个 Star ⭐，并引用本软件仓库：
 
 ```bibtex
-@software{mao2026robonix_vla_action_decision_service,
+@software{mao2026robonix_vla_action_verify_service,
   author  = {Mao, Zhihao and He, Huiru and Zheng, Zihao},
-  title   = {RoboNix VLA Action Decision Service},
+  title   = {RoboNix VLA Action Verify Service},
   year    = {2026},
   version = {0.1.0},
-  url     = {https://github.com/lusunn111/service-vla-action-decision-rbnx}
+  url     = {https://github.com/lusunn111/service-vla-action-verify-rbnx}
 }
 ```
 

@@ -2,11 +2,11 @@
 description: Return a candidate VLA action without commanding robot hardware.
 ---
 
-# VLA action decision
+# VLA action verification
 
 ## Public capability
 
-`robonix/service/vla/action_decision/decide`
+`robonix/service/vla/action_verify/verify`
 
 The Service accepts a language instruction, a deployment-owned local
 observation image, and a timeout. It first attempts Drafter proposal plus target
@@ -20,7 +20,7 @@ filename type must match its file signature. The returned action must match
 ## Lifecycle
 
 RoboNix activation does not import PyTorch, allocate GPU memory, or load either
-checkpoint. The first real `decide` call performs lazy loading, and subsequent
+checkpoint. The first real `verify` call performs lazy loading, and subsequent
 calls reuse the same model pair. Before loading, the Service checks the target
 processor, dataset statistics, target weights, Drafter configuration, and the
 weight filename required by serial or parallel draft mode.

@@ -5,7 +5,7 @@
   "latency_p50_ms": 183.56859032064676,
   "latency_p95_ms": 215.32166469842196,
   "policy_steps": 120,
-  "route": "Executor -> Atlas -> MCP -> vla_action_decision",
+  "route": "Executor -> Atlas -> MCP -> vla_action_verify",
   "schema_version": 1,
   "success": true,
   "task_id": 0,

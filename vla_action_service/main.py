@@ -1,20 +1,20 @@
-"""RoboNix Service provider for VLA action decisions."""
+"""RoboNix Service provider for VLA action verification."""
 
 from __future__ import annotations
 
 import ipaddress
 import os
 
-from action_decision_mcp import Decide_Request, Decide_Response
+from action_verify_mcp import Verify_Request, Verify_Response
 from robonix_api import Err, Ok, Service
 
-from .backend import BackendError, DecisionRequest
+from .backend import BackendError, VerifyRequest
 from .runtime import ServiceRuntime
 
 
 service = Service(
-    id="vla_action_decision",
-    namespace="robonix/service/vla/action_decision",
+    id="vla_action_verify",
+    namespace="robonix/service/vla/action_verify",
 )
 runtime = ServiceRuntime()
 
@@ -93,14 +93,14 @@ def shutdown():
 
 
 @service.mcp(
-    "robonix/service/vla/action_decision/decide",
+    "robonix/service/vla/action_verify/verify",
     description="Return a candidate VLA action without commanding robot hardware.",
 )
-def decide(request: Decide_Request) -> Decide_Response:
+def verify(request: Verify_Request) -> Verify_Response:
     """Run speculative inference with target-model fallback."""
     try:
-        result = runtime.decide(
-            DecisionRequest(
+        result = runtime.verify(
+            VerifyRequest(
                 instruction=request.instruction,
                 observation_uri=request.observation_uri,
                 timeout_s=float(request.timeout_s),
@@ -108,7 +108,7 @@ def decide(request: Decide_Request) -> Decide_Response:
         )
     except (BackendError, RuntimeError, TypeError, ValueError) as exc:
         raise RuntimeError(str(exc)) from exc
-    return Decide_Response(
+    return Verify_Response(
         success=result.success,
         actions=list(result.actions),
         action_horizon=result.action_horizon,

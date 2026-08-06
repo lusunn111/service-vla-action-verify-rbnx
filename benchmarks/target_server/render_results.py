@@ -27,7 +27,7 @@ def main() -> None:
         height = 210 * value / maximum
         y = 260 - height
         bars.append(f'<rect x="{x}" y="{y:.2f}" width="105" height="{height:.2f}" fill="#7c3aed"/><text x="{x + 52}" y="{y - 8:.2f}" text-anchor="middle" font-size="13">{value:.2f} ms</text><text x="{x + 52}" y="286" text-anchor="middle" font-size="12">{label}</text>')
-    svg = '<svg xmlns="http://www.w3.org/2000/svg" width="680" height="320" viewBox="0 0 680 320"><rect width="680" height="320" fill="white"/><text x="340" y="28" text-anchor="middle" font-family="sans-serif" font-size="18">VLA action-decision latency</text><line x1="55" y1="260" x2="635" y2="260" stroke="#111"/>' + "".join(bars) + "</svg>\n"
+    svg = '<svg xmlns="http://www.w3.org/2000/svg" width="680" height="320" viewBox="0 0 680 320"><rect width="680" height="320" fill="white"/><text x="340" y="28" text-anchor="middle" font-family="sans-serif" font-size="18">VLA action-verify latency</text><line x1="55" y1="260" x2="635" y2="260" stroke="#111"/>' + "".join(bars) + "</svg>\n"
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(svg, encoding="utf-8")
 

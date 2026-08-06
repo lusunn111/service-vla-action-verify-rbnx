@@ -60,7 +60,7 @@ python run_benchmark.py service \
   --target-checkpoint "$VLA_TARGET_CHECKPOINT" \
   --drafter-checkpoint "$VLA_DRAFTER_CHECKPOINT" \
   --gpu-index 1 --atlas 127.0.0.1:50351 \
-  --provider vla_action_decision \
+  --provider vla_action_verify \
   --warmup 1 --repeats 3 --output-dir results
 
 rbnx shutdown -f ../../examples/real-deployment/robonix_manifest.yaml
@@ -89,7 +89,7 @@ export MUJOCO_GL=egl
 
 python run_robonix_rollout.py \
   --atlas 127.0.0.1:50351 \
-  --provider vla_action_decision \
+  --provider vla_action_verify \
   --output-dir "$VALIDATION_ROOT/vla-rollout" \
   --task-suite libero_goal --task-id 0 --initial-state 0 \
   --wait-steps 10 --max-steps 300 --timeout-s 600 --fps 30

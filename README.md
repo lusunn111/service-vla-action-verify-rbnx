@@ -3,26 +3,26 @@
      Markdown nested in block-level HTML as literal source text. -->
 <div align="center">
   <p><strong>This RoboNix Service is provided and maintained by Prof. Xiang Chen's group (<a href="https://if-lab-pku.github.io/">IFLab</a>), School of Computer Science, Peking University.</strong></p>
-  <h1>RoboNix VLA Action Decision Service</h1>
+  <h1>RoboNix VLA Action Verify Service</h1>
   <p><strong>Speculative VLA inference with lazy GPU loading, target-model verification, and deterministic fallback.</strong></p>
   <p>
     <a href="README-CN.md">简体中文</a> ·
-    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx#what-this-adds">What this adds</a> ·
-    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx#demo-video">Demo Video</a> ·
-    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx#release-results">Release results</a> ·
-    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx#quick-start">Quick Start</a> ·
-    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx#citation">Citation</a>
+    <a href="https://github.com/lusunn111/service-vla-action-verify-rbnx#what-this-adds">What this adds</a> ·
+    <a href="https://github.com/lusunn111/service-vla-action-verify-rbnx#demo-video">Demo Video</a> ·
+    <a href="https://github.com/lusunn111/service-vla-action-verify-rbnx#release-results">Release results</a> ·
+    <a href="https://github.com/lusunn111/service-vla-action-verify-rbnx#quick-start">Quick Start</a> ·
+    <a href="https://github.com/lusunn111/service-vla-action-verify-rbnx#citation">Citation</a>
   </p>
   <p>
-    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx/actions/workflows/ci.yml"><img src="https://github.com/lusunn111/service-vla-action-decision-rbnx/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
+    <a href="https://github.com/lusunn111/service-vla-action-verify-rbnx/actions/workflows/ci.yml"><img src="https://github.com/lusunn111/service-vla-action-verify-rbnx/actions/workflows/ci.yml/badge.svg" alt="CI status"></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/license-MulanPSL--2.0-red" alt="MulanPSL-2.0 license"></a>
-    <a href="https://github.com/lusunn111/service-vla-action-decision-rbnx/stargazers"><img src="https://img.shields.io/github/stars/lusunn111/service-vla-action-decision-rbnx?style=flat&amp;logo=github" alt="GitHub stars"></a>
+    <a href="https://github.com/lusunn111/service-vla-action-verify-rbnx/stargazers"><img src="https://img.shields.io/github/stars/lusunn111/service-vla-action-verify-rbnx?style=flat&amp;logo=github" alt="GitHub stars"></a>
   </p>
-  <p><img width="100%" src="docs/assets/readme/vla-action-decision-hero.webp" alt="Drafter candidates flowing through target-model verification and fallback into one candidate action"></p>
-  <p><a href="https://github.com/lusunn111/service-vla-action-decision-rbnx#performance-snapshot"><img width="92%" src="docs/assets/readme/result-badges.svg" alt="1.57 times peak speedup, 83.7 percent best success rate, and 27 to 37 percent gain over the speculative baseline"></a></p>
+  <p><img width="100%" src="docs/assets/readme/vla-action-verify-hero.webp" alt="Drafter candidates flowing through target-model verification and fallback into one candidate action"></p>
+  <p><a href="https://github.com/lusunn111/service-vla-action-verify-rbnx#performance-snapshot"><img width="92%" src="docs/assets/readme/result-badges.svg" alt="1.57 times peak speedup, 83.7 percent best success rate, and 27 to 37 percent gain over the speculative baseline"></a></p>
 </div>
 
-The **RoboNix VLA Action Decision Service** lets
+The **RoboNix VLA Action Verify Service** lets
 existing Vision-Language-Action (VLA) models verify low-cost action proposals
 with both the target model and motion priors before execution. Adaptive
 acceptance, motion compensation, and policy fallback reduce repeated large-model
@@ -43,15 +43,15 @@ task orchestration and physical execution remain outside the provider.
 
 | RoboNix gets | Concrete behavior |
 | --- | --- |
-| One action-decision capability | `decide` accepts an instruction and one validated local observation, then returns one candidate action and its inference mode. |
+| One action-verify capability | `verify` accepts an instruction and one validated local observation, then returns one candidate action and its inference mode. |
 | GPU-safe activation | `rbnx boot` does not import PyTorch or allocate model memory; both checkpoints load on the first real call. |
 | Deterministic recovery | Drafter/speculative failure calls the already-loaded target model; only a target-model failure makes the capability call fail. |
 | A self-contained inference implementation | Service inference source ships in the Wheel; model weights remain external deployment assets. |
 | A hardware safety boundary | The Service returns a candidate action only. It never sends robot commands or owns the execution loop. |
 | Reproducible full-chain evidence | 10 real LIBERO-Goal observations produced 30 Executor/MCP calls with maximum action error `0.0` against direct speculative inference. |
 
-The catalog identity is `robonix.service.vla.action_decision`; the public
-contract is `robonix/service/vla/action_decision/decide`.
+The catalog identity is `robonix.service.vla.action_verify`; the public
+contract is `robonix/service/vla/action_verify/verify`.
 
 <a id="demo-video"></a>
 ## 🎬 Demo Video
@@ -73,7 +73,7 @@ Run, record, and render the same layout with:
 python -m pip install 'Pillow>=10' 'imageio>=2.34' 'imageio-ffmpeg>=0.5' 'numpy>=1.26'
 python benchmarks/target_server/run_robonix_rollout.py \
   --atlas 127.0.0.1:50351 \
-  --provider vla_action_decision \
+  --provider vla_action_verify \
   --output-dir "$RUN_ROOT" \
   --task-suite libero_goal --task-id 0 --initial-state 0 \
   --max-steps 300 --fps 30
@@ -123,8 +123,8 @@ rather than by importing the provider class directly.
 ## RoboNix Service package
 
 The repository root is directly publishable as
-`robonix.service.vla.action_decision`. It exposes
-`robonix/service/vla/action_decision/decide`, returns candidate actions only,
+`robonix.service.vla.action_verify`. It exposes
+`robonix/service/vla/action_verify/verify`, returns candidate actions only,
 and never commands robot hardware. RoboNix activation does not import PyTorch
 or allocate GPU memory; the target model and Drafter load on the first real
 request.
@@ -157,7 +157,7 @@ benchmark material below remain in this repository.
 The release path is:
 
 ```text
-Executor -> Atlas -> MCP -> vla_action_decision
+Executor -> Atlas -> MCP -> vla_action_verify
          -> repository-packaged OpenVLA/SpecVLA source -> external checkpoints
 ```
 
@@ -188,7 +188,7 @@ rbnx build -f robonix_manifest.yaml
 rbnx boot -v --no-update-check -f robonix_manifest.yaml
 rbnx caps -v --server 127.0.0.1:50351
 rbnx tools --server 127.0.0.1:50351
-rbnx describe --server 127.0.0.1:50351 --provider vla_action_decision
+rbnx describe --server 127.0.0.1:50351 --provider vla_action_verify
 rbnx inspect --server 127.0.0.1:50351
 ```
 
@@ -198,15 +198,15 @@ must not occupy the selected GPU. Invoke through Executor:
 ```bash
 python ../../benchmarks/target_server/invoke_executor.py \
   --atlas 127.0.0.1:50351 \
-  --provider vla_action_decision \
-  --contract robonix/service/vla/action_decision/decide \
+  --provider vla_action_verify \
+  --contract robonix/service/vla/action_verify/verify \
   --args-json '{"instruction":"pick up the bowl","observation_uri":"/absolute/input/observation.jpg","timeout_s":600}' \
   --timeout-s 900
 
 rbnx shutdown -f robonix_manifest.yaml
 ```
 
-The first `decide` lazily imports the inference stack and loads both models.
+The first `verify` lazily imports the inference stack and loads both models.
 If speculative decoding fails, the already-loaded target model is called; only
 dual failure fails the MCP call. The local observation must remain below
 `allowed_image_root` and pass signature, size, and pixel-count checks.
@@ -252,7 +252,7 @@ over the naive speculative VLA path.
 <a id="news"></a>
 ## 📰 News
 
-- **2026-07-19**: 🆕 Released the system-level VLA action decision
+- **2026-07-19**: 🆕 Released the system-level VLA action verification
   Service with capability results, model support, and bilingual documentation.
 - **2026-07-18**: 🔥 Validated independent-root execution, target and Drafter
   checkpoint loading, and a bounded 100-step LIBERO rollout with H.264 video export.
@@ -335,7 +335,7 @@ does not claim a material speedup. Process-level GPU allocation peaked at
 39,603 MiB because the preserved TensorFlow preprocessing stack reserved most
 remaining memory; this is an explicit deployment risk on a 40GB GPU.
 
-![VLA action-decision latency](benchmarks/target_server/results/latency.svg)
+![VLA action-verify latency](benchmarks/target_server/results/latency.svg)
 
 Raw calls, fallback evidence, exact environment, and reporting limits are in
 [benchmarks/target_server/](benchmarks/target_server/) and
@@ -417,8 +417,8 @@ The repository does not include model weights, datasets, or LIBERO assets. Prepa
 Clone the project and run all commands from the repository root:
 
 ```bash
-git clone https://github.com/lusunn111/service-vla-action-decision-rbnx.git
-cd service-vla-action-decision-rbnx
+git clone https://github.com/lusunn111/service-vla-action-verify-rbnx.git
+cd service-vla-action-verify-rbnx
 
 conda create -n spec-decoding python=3.10 -y
 conda activate spec-decoding
@@ -612,7 +612,7 @@ The default strategy is `modules.strategies.modeling_speculation`. The `_1`, `_1
 ### `rbnx boot` shows no GPU allocation
 
 That is the intended lifecycle. Activation registers the capability without
-importing PyTorch; target and Drafter checkpoints load on the first `decide`.
+importing PyTorch; target and Drafter checkpoints load on the first `verify`.
 Use `rbnx caps`, `rbnx tools`, and `rbnx describe` to verify registration before
 issuing the first model request.
 
@@ -676,12 +676,12 @@ If this Service supports your research, please consider giving the repository a
 star ⭐ and citing this software repository:
 
 ```bibtex
-@software{mao2026robonix_vla_action_decision_service,
+@software{mao2026robonix_vla_action_verify_service,
   author  = {Mao, Zhihao and He, Huiru and Zheng, Zihao},
-  title   = {RoboNix VLA Action Decision Service},
+  title   = {RoboNix VLA Action Verify Service},
   year    = {2026},
   version = {0.1.0},
-  url     = {https://github.com/lusunn111/service-vla-action-decision-rbnx}
+  url     = {https://github.com/lusunn111/service-vla-action-verify-rbnx}
 }
 ```
 

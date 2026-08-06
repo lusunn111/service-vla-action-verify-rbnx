@@ -20,8 +20,8 @@ class BackendError(RuntimeError):
 
 
 @dataclass(frozen=True)
-class DecisionRequest:
-    """One action-decision request independent from generated RoboNix types."""
+class VerifyRequest:
+    """One action-verify request independent from generated RoboNix types."""
 
     instruction: str
     observation_uri: str
@@ -29,7 +29,7 @@ class DecisionRequest:
 
 
 @dataclass(frozen=True)
-class DecisionResult:
+class VerifyResult:
     """A normalized candidate action and its inference mode."""
 
     success: bool
@@ -45,7 +45,7 @@ class DecisionResult:
 class DecisionBackend(Protocol):
     """Lifecycle and request boundary implemented by every backend."""
 
-    def decide(self, request: DecisionRequest) -> DecisionResult: ...
+    def verify(self, request: VerifyRequest) -> VerifyResult: ...
 
     def close(self) -> None: ...
 
@@ -266,12 +266,12 @@ class ResearchModelAdapter:
 class MockDecisionBackend:
     """Non-executable lifecycle backend used only by automated tests."""
 
-    def decide(self, request: DecisionRequest) -> DecisionResult:
+    def verify(self, request: VerifyRequest) -> VerifyResult:
         if not request.instruction.strip():
             raise BackendError("instruction must not be empty")
         if not math.isfinite(request.timeout_s) or request.timeout_s <= 0:
             raise BackendError("timeout_s must be a positive finite value")
-        return DecisionResult(
+        return VerifyResult(
             success=False,
             mode="mock",
             fallback_required=True,
@@ -445,7 +445,7 @@ class OpenVLADecisionBackend:
             self._adapter = self._load_adapter()
         return self._adapter
 
-    def decide(self, request: DecisionRequest) -> DecisionResult:
+    def verify(self, request: VerifyRequest) -> VerifyResult:
         instruction = request.instruction.strip()
         if not instruction:
             raise BackendError("instruction must not be empty")
@@ -515,7 +515,7 @@ class OpenVLADecisionBackend:
                 )
             mode = "speculative"
             fallback_used = False
-        return DecisionResult(
+        return VerifyResult(
             success=True,
             actions=action,
             action_horizon=1,

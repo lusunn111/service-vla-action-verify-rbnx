@@ -5,7 +5,7 @@ from __future__ import annotations
 from threading import RLock
 from typing import Any
 
-from .backend import DecisionBackend, DecisionRequest, DecisionResult, build_backend
+from .backend import DecisionBackend, VerifyRequest, VerifyResult, build_backend
 
 
 class ServiceRuntime:
@@ -45,11 +45,11 @@ class ServiceRuntime:
                 raise RuntimeError("Service has not been initialized")
             self._active = True
 
-    def decide(self, request: DecisionRequest) -> DecisionResult:
+    def verify(self, request: VerifyRequest) -> VerifyResult:
         with self._lock:
             if not self._active or self._backend is None:
                 raise RuntimeError("Service is not active")
-            return self._backend.decide(request)
+            return self._backend.verify(request)
 
     def deactivate(self) -> None:
         """Stop new calls and release model state, even if cleanup reports an error."""

@@ -73,11 +73,11 @@ def main() -> None:
         smoke_test = """
 import importlib.util
 from pathlib import Path
-from vla_action_service.backend import DecisionRequest
+from vla_action_service.backend import VerifyRequest
 from service_bootstrap import activate_vendor
 
 root = activate_vendor()
-assert DecisionRequest("move", "/tmp/observation.jpg").instruction == "move"
+assert VerifyRequest("move", "/tmp/observation.jpg").instruction == "move"
 for name in (
     "experiments.robot.openvla_utils",
     "openvla.prismatic",

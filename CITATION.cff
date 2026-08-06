@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it using the metadata below."
-title: "RoboNix VLA Action Decision Service"
+title: "RoboNix VLA Action Verify Service"
 type: software
 version: 0.1.0
 date-released: 2026-07-31
@@ -8,4 +8,4 @@ license: MulanPSL-2.0
 authors:
   - family-names: Mao
     given-names: Zhihao
-repository-code: "https://github.com/lusunn111/service-vla-action-decision-rbnx"
+repository-code: "https://github.com/lusunn111/service-vla-action-verify-rbnx"

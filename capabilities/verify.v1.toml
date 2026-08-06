@@ -1,8 +1,8 @@
 [contract]
-id = "robonix/service/vla/action_decision/decide"
+id = "robonix/service/vla/action_verify/verify"
 version = "1"
 kind = "service"
-idl = "action_decision/srv/Decide.srv"
+idl = "action_verify/srv/Verify.srv"
 description = "Return a candidate VLA action using speculative inference with target-model fallback."
 
 [mode]

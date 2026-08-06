@@ -6,7 +6,7 @@ Release candidate 0.1.0 was validated on 2026-08-01 through the real RoboNix
 route:
 
 ```text
-Executor -> Atlas -> MCP -> VLA action-decision Service
+Executor -> Atlas -> MCP -> VLA action-verify Service
          -> repository-packaged OpenVLA/SpecVLA inference -> external checkpoints
 ```
 
@@ -16,7 +16,7 @@ connected by checked symbolic links; they are not redistributed.
 
 The validation passed:
 
-- RoboNix boot registered the `decide` MCP capability without importing
+- RoboNix boot registered the `verify` MCP capability without importing
   PyTorch or allocating GPU memory. GPU 1 remained at 3 MiB.
 - The first Executor call lazily loaded the target OpenVLA and Drafter and
   returned a finite 7-dimensional candidate action in `speculative` mode.
@@ -71,7 +71,7 @@ reported by `nvidia-smi` reached 39,603 MiB after image preprocessing because
 the preserved TensorFlow stack reserved most remaining GPU memory. This number
 is not model-weight size and is a deployment risk on a 40GB GPU.
 
-![VLA action-decision latency](benchmarks/target_server/results/latency.svg)
+![VLA action-verify latency](benchmarks/target_server/results/latency.svg)
 
 Raw calls, cold-start data, fault-injection evidence, summary, input provenance
 hashes, and the deterministic chart are committed under

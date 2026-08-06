@@ -34,19 +34,19 @@ def test_provider_wires_service_lifecycle_and_non_executable_mock(monkeypatch):
     api.Service = FakeService
     api.Ok = lambda: ("ok", "")
     api.Err = lambda detail: ("err", detail)
-    generated = ModuleType("action_decision_mcp")
-    generated.Decide_Request = object
-    generated.Decide_Response = FakeResponse
+    generated = ModuleType("action_verify_mcp")
+    generated.Verify_Request = object
+    generated.Verify_Response = FakeResponse
     monkeypatch.setitem(sys.modules, "robonix_api", api)
-    monkeypatch.setitem(sys.modules, "action_decision_mcp", generated)
+    monkeypatch.setitem(sys.modules, "action_verify_mcp", generated)
     sys.modules.pop("vla_action_service.main", None)
 
     provider = importlib.import_module("vla_action_service.main")
-    assert provider.service.id == "vla_action_decision"
-    assert provider.service.namespace == "robonix/service/vla/action_decision"
+    assert provider.service.id == "vla_action_verify"
+    assert provider.service.namespace == "robonix/service/vla/action_verify"
     assert provider.init({"backend_mode": "mock"})[0] == "ok"
     assert provider.activate()[0] == "ok"
-    response = provider.decide(
+    response = provider.verify(
         SimpleNamespace(instruction="test", observation_uri="unused.jpg", timeout_s=1.0)
     )
     assert not response.success

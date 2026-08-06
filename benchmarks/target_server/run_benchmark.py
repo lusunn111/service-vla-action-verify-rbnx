@@ -18,13 +18,13 @@ sys.path.insert(0, str(ROOT))
 
 from executor_client import ExecutorClient
 from vla_action_service.backend import (
-    DecisionRequest,
+    VerifyRequest,
     OpenVLADecisionBackend,
     _normalize_action,
 )
 
 
-CONTRACT = "robonix/service/vla/action_decision/decide"
+CONTRACT = "robonix/service/vla/action_verify/verify"
 
 
 def _cases(manifest: Path, input_root: Path) -> list[dict]:
@@ -186,7 +186,7 @@ def run_fallback(args, cases: list[dict]) -> None:
         backend._adapter = _FailingSpeculativeAdapter(backend._ensure_ready())
         case = cases[0]
         started = time.perf_counter()
-        result = backend.decide(DecisionRequest(str(case["instruction"]), case["path"], 600.0))
+        result = backend.verify(VerifyRequest(str(case["instruction"]), case["path"], 600.0))
         payload = {
             "case_id": case["case_id"], "mode": result.mode, "fallback_used": result.fallback_used,
             "latency_ms": (time.perf_counter() - started) * 1000.0,
@@ -266,7 +266,7 @@ def main() -> None:
     parser.add_argument("--target-checkpoint", type=Path)
     parser.add_argument("--drafter-checkpoint", type=Path)
     parser.add_argument("--atlas", default="127.0.0.1:50351")
-    parser.add_argument("--provider", default="vla_action_decision")
+    parser.add_argument("--provider", default="vla_action_verify")
     parser.add_argument("--gpu-index", default="1")
     parser.add_argument("--warmup", type=int, default=1)
     parser.add_argument("--repeats", type=int, default=3)

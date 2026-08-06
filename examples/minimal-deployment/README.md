@@ -14,7 +14,7 @@ For a real deployment, configure `target_checkpoint`, `drafter_checkpoint`,
 
 ```yaml
 service:
-  - name: vla_action_decision
+  - name: vla_action_verify
     path: ../..
     config:
       backend_mode: openvla
@@ -28,7 +28,7 @@ service:
       max_timeout_s: 300
 ```
 
-The first real `decide` call validates the checkpoint layout and then loads the
+The first real `verify` call validates the checkpoint layout and then loads the
 target model and Drafter. `cuda_visible_devices: "1"` exposes physical GPU 1 as
 logical `cuda:0` before PyTorch is imported.
 

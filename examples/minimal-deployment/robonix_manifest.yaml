@@ -1,10 +1,10 @@
 manifestVersion: 1
-name: vla-action-decision-service-demo
+name: vla-action-verify-service-demo
 
 catalog:
-  name: robonix.robot.demo.vla_action_decision
+  name: robonix.robot.demo.vla_action_verify
   version: 0.1.0
-  description: Desktop-only deployment for validating the VLA action decision Service.
+  description: Desktop-only deployment for validating the VLA action verification Service.
   license: MulanPSL-2.0
   tags: [robot, deploy, demo, service]
   maintainers:
@@ -26,7 +26,7 @@ system:
   liaison: { listen: 127.0.0.1:50181, log: info }
 
 service:
-  - name: vla_action_decision
+  - name: vla_action_verify
     path: ../..
     config:
       backend_mode: mock
