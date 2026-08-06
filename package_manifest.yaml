@@ -1,11 +1,11 @@
 manifestVersion: 1
 
 package:
-  name: robonix.service.vla.action_decision
+  name: robonix.service.vla.action_verify
   version: 0.1.0
-  description: Lazy in-process VLA action decision service with Drafter verification and target-model fallback.
+  description: Lazy in-process VLA action verification service with Drafter verification and target-model fallback.
   license: MulanPSL-2.0
-  tags: [service, vla, action-decision, speculative-decoding, drafter, openvla]
+  tags: [service, vla, action-verify, speculative-decoding, drafter, openvla]
   maintainers:
     - Zhihao Mao <lusunn111@users.noreply.github.com>
 
@@ -14,5 +14,5 @@ start: bash scripts/start.sh
 stop: bash scripts/stop.sh
 
 capabilities:
-  - name: robonix/service/vla/action_decision/decide
-    path: capabilities/decide.v1.toml
+  - name: robonix/service/vla/action_verify/verify
+    path: capabilities/verify.v1.toml

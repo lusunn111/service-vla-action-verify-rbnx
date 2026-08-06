@@ -1,4 +1,4 @@
-# Public deployment configuration for robonix.service.vla.action_decision.
+# Public deployment configuration for robonix.service.vla.action_verify.
 backend_mode:
   type: enum[openvla,mock]
   default: openvla

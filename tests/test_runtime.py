@@ -10,7 +10,7 @@ import pytest
 
 from vla_action_service.backend import (
     BackendError,
-    DecisionRequest,
+    VerifyRequest,
     OpenVLADecisionBackend,
     ResearchModelAdapter,
 )
@@ -70,7 +70,7 @@ def test_mock_lifecycle_never_returns_an_executable_action():
     runtime = ServiceRuntime()
     runtime.configure({"backend_mode": "mock"})
     runtime.activate()
-    result = runtime.decide(DecisionRequest("test", "unused.jpg"))
+    result = runtime.verify(VerifyRequest("test", "unused.jpg"))
     assert not result.success
     assert not result.actions
     assert result.mode == "mock"
@@ -86,7 +86,7 @@ def test_openvla_load_is_deferred_until_first_decide():
         adapter = FakeAdapter(speculative=[0.0] * 7)
         backend = _backend(tmp, adapter)
         assert backend._adapter is None
-        result = backend.decide(DecisionRequest("pick up the cup", str(image)))
+        result = backend.verify(VerifyRequest("pick up the cup", str(image)))
         assert backend._adapter is adapter
         assert result.success
         assert result.mode == "speculative"
@@ -101,7 +101,7 @@ def test_speculative_failure_reuses_target_model_for_fallback():
         image.write_bytes(b"\x89PNG\r\n\x1a\n" + b"\x00" * 32)
         adapter = FakeAdapter(RuntimeError("drafter failed"), [0.1] * 7)
         backend = _backend(tmp, adapter)
-        result = backend.decide(DecisionRequest("move left", f"file://{image}"))
+        result = backend.verify(VerifyRequest("move left", f"file://{image}"))
         assert result.success
         assert result.mode == "target_fallback"
         assert result.fallback_used
@@ -145,7 +145,7 @@ def test_both_inference_paths_failing_is_a_call_error():
         adapter = FakeAdapter(RuntimeError("draft"), RuntimeError("target"))
         backend = _backend(tmp, adapter)
         with pytest.raises(BackendError, match="both failed"):
-            backend.decide(DecisionRequest("move", str(image)))
+            backend.verify(VerifyRequest("move", str(image)))
         assert adapter.closed
         assert backend._adapter is None
 
@@ -156,17 +156,17 @@ def test_image_boundary_and_action_values_are_validated():
         outside_image.write_bytes(JPEG)
         backend = _backend(allowed, FakeAdapter(speculative=[0.0] * 7))
         with pytest.raises(BackendError, match="outside allowed_image_root"):
-            backend.decide(DecisionRequest("move", str(outside_image)))
+            backend.verify(VerifyRequest("move", str(outside_image)))
 
         image = Path(allowed) / "observation.jpg"
         image.write_bytes(JPEG)
         backend = _backend(allowed, FakeAdapter(speculative=[math.nan] * 7))
         with pytest.raises(BackendError, match="non-finite"):
-            backend.decide(DecisionRequest("move", str(image)))
+            backend.verify(VerifyRequest("move", str(image)))
 
         backend = _backend(allowed, FakeAdapter(speculative=[True] * 7))
         with pytest.raises(BackendError, match="non-numeric"):
-            backend.decide(DecisionRequest("move", str(image)))
+            backend.verify(VerifyRequest("move", str(image)))
 
 
 def test_timeout_is_reported_after_non_preemptible_inference():
@@ -181,7 +181,7 @@ def test_timeout_is_reported_after_non_preemptible_inference():
         adapter = FakeAdapter(speculative=slow_action)
         backend = _backend(tmp, adapter)
         with pytest.raises(BackendError, match="exceeded timeout"):
-            backend.decide(DecisionRequest("move", str(image), timeout_s=0.001))
+            backend.verify(VerifyRequest("move", str(image), timeout_s=0.001))
         assert adapter.closed
         assert backend._adapter is None
 
@@ -198,7 +198,7 @@ def test_expired_speculative_failure_does_not_start_target_fallback():
         adapter = FakeAdapter(speculative=slow_failure, target=[0.0] * 7)
         backend = _backend(tmp, adapter)
         with pytest.raises(BackendError, match="fallback was skipped"):
-            backend.decide(DecisionRequest("move", str(image), timeout_s=0.001))
+            backend.verify(VerifyRequest("move", str(image), timeout_s=0.001))
         assert adapter.speculative_calls == 1
         assert adapter.target_calls == 0
         assert adapter.closed
@@ -211,7 +211,7 @@ def test_wrong_action_dimension_triggers_target_fallback():
         image.write_bytes(JPEG)
         adapter = FakeAdapter(speculative=[0.0] * 6, target=[0.1] * 7)
         backend = _backend(tmp, adapter)
-        result = backend.decide(DecisionRequest("move", str(image)))
+        result = backend.verify(VerifyRequest("move", str(image)))
         assert result.success
         assert result.mode == "target_fallback"
         assert result.action_dim == 7
@@ -223,10 +223,10 @@ def test_image_signature_must_match_extension_and_network_uri_is_rejected():
         image.write_bytes(JPEG)
         backend = _backend(tmp, FakeAdapter(speculative=[0.0] * 7))
         with pytest.raises(BackendError, match="not a supported"):
-            backend.decide(DecisionRequest("move", str(image)))
+            backend.verify(VerifyRequest("move", str(image)))
         with pytest.raises(BackendError, match="only supports local"):
-            backend.decide(
-                DecisionRequest("move", "https://example.invalid/observation.jpg")
+            backend.verify(
+                VerifyRequest("move", "https://example.invalid/observation.jpg")
             )
 
 

@@ -2,7 +2,7 @@
 
 This service-only deployment starts Atlas, Executor, and this published
 Service. It omits Pilot, Liaison, Soma, and robot hardware. The first real
-`decide` call loads the repository's packaged OpenVLA/SpecVLA implementation;
+`verify` call loads the repository's packaged OpenVLA/SpecVLA implementation;
 only model checkpoints and observations are external assets.
 
 Copy `.env.example` to an untracked `.env`, replace every absolute path, then:
@@ -25,8 +25,8 @@ rbnx caps -v --server 127.0.0.1:50351
 rbnx tools --server 127.0.0.1:50351
 python ../../benchmarks/target_server/invoke_executor.py \
   --atlas 127.0.0.1:50351 \
-  --provider vla_action_decision \
-  --contract robonix/service/vla/action_decision/decide \
+  --provider vla_action_verify \
+  --contract robonix/service/vla/action_verify/verify \
   --args-json '{"instruction":"pick up the bowl","observation_uri":"/absolute/path/observation.png","timeout_s":600}' \
   --timeout-s 900
 ```

@@ -3,9 +3,9 @@ requires = ["setuptools>=77", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "robonix-service-vla-action-decision"
+name = "robonix-service-vla-action-verify"
 version = "0.1.0"
-description = "RoboNix VLA action decision service with speculative decoding"
+description = "RoboNix VLA action verification service with speculative decoding"
 readme = "README.md"
 license = "MulanPSL-2.0"
 license-files = [

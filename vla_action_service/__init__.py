@@ -1,6 +1,6 @@
-"""RoboNix VLA action decision Service."""
+"""RoboNix VLA action verification Service."""
 
-from .backend import DecisionRequest, DecisionResult
+from .backend import VerifyRequest, VerifyResult
 from .runtime import ServiceRuntime
 
-__all__ = ["DecisionRequest", "DecisionResult", "ServiceRuntime"]
+__all__ = ["VerifyRequest", "VerifyResult", "ServiceRuntime"]

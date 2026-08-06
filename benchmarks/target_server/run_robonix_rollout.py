@@ -16,7 +16,7 @@ from PIL import Image, ImageDraw, ImageFont
 from executor_client import ExecutorClient
 
 
-CONTRACT = "robonix/service/vla/action_decision/decide"
+CONTRACT = "robonix/service/vla/action_verify/verify"
 
 
 def _font(size: int, bold: bool = False):
@@ -68,7 +68,7 @@ def _render_frame(
     draw.text((28, 52), "Executor → Atlas → MCP → VLA Service", font=_font(17), fill="#67e8f9")
 
     left = 760
-    draw.text((left, 42), "VLA Action Decision", font=_font(32, True), fill="#f8fafc")
+    draw.text((left, 42), "VLA Action Verify", font=_font(32, True), fill="#f8fafc")
     draw.text((left, 88), "IFLab · Peking University", font=_font(18), fill="#94a3b8")
     draw.line((left, 126, 1232, 126), fill="#1e3a5f", width=2)
 
@@ -125,7 +125,7 @@ def _policy_action(output: dict) -> np.ndarray:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--atlas", default="127.0.0.1:50351")
-    parser.add_argument("--provider", default="vla_action_decision")
+    parser.add_argument("--provider", default="vla_action_verify")
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--task-suite", default="libero_goal")
     parser.add_argument("--task-id", type=int, default=0)
@@ -227,7 +227,7 @@ def main() -> None:
     ordered = sorted(latencies)
     summary = {
         "schema_version": 1,
-        "route": "Executor -> Atlas -> MCP -> vla_action_decision",
+        "route": "Executor -> Atlas -> MCP -> vla_action_verify",
         "task_suite": args.task_suite,
         "task_id": args.task_id,
         "initial_state": args.initial_state,

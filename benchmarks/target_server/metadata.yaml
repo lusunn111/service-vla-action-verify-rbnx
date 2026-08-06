@@ -2,7 +2,7 @@ schema_version: 1
 status: passed
 validation_date: 2026-08-01
 service_version: 0.1.0
-contract: robonix/service/vla/action_decision/decide
+contract: robonix/service/vla/action_verify/verify
 robonix:
   version: 0.1.0
   commit: 48af09190b99f7847dddf68457eec2db42d2c1a7

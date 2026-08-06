@@ -49,7 +49,7 @@ All modules and arrows must stay fully inside the frame. Use large, readable san
 ## README hero image
 
 The decorative README hero is saved as
-`docs/assets/readme/vla-action-decision-hero.webp`. It does not encode benchmark
+`docs/assets/readme/vla-action-verify-hero.webp`. It does not encode benchmark
 values or robot task-success evidence.
 
 ### Built-in ImageGen regeneration prompt
@@ -57,7 +57,7 @@ values or robot task-success evidence.
 ```text
 Use case: stylized-concept
 Asset type: wide open-source project README hero banner
-Primary request: Visualize speculative VLA action decision as a compact Drafter candidate tree entering a large target-model verification core, with a visible fallback loop and one ordered candidate action sequence leaving the system.
+Primary request: Visualize speculative VLA action verification as a compact Drafter candidate tree entering a large target-model verification core, with a visible fallback loop and one ordered candidate action sequence leaving the system.
 Scene/backdrop: deep navy scientific computing space with subtle orbital and network geometry
 Subject: branching Drafter candidates, a dominant verification core, one fallback path, and one selected action sequence
 Style/medium: premium cinematic scientific visualization, technically credible, polished 3D particles and fine data lines

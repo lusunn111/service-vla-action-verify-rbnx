@@ -45,7 +45,7 @@ def test_committed_real_results_are_complete_and_reproducible(tmp_path):
     assert summary["routes"]["direct_speculative"]["calls"] == 30
     assert summary["routes"]["robonix_executor_mcp"]["calls"] == 30
     rollout = json.loads((results / "rollout-summary.json").read_text())
-    assert rollout["route"] == "Executor -> Atlas -> MCP -> vla_action_decision"
+    assert rollout["route"] == "Executor -> Atlas -> MCP -> vla_action_verify"
     assert rollout["task_suite"] == "libero_goal"
     assert rollout["task_id"] == 0
     assert rollout["initial_state"] == 0

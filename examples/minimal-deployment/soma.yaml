@@ -1,11 +1,11 @@
 urdf:
   path: ./urdf/mock_robot.urdf
   root_link: base_link
-  model_name: vla_action_decision_demo
+  model_name: vla_action_verify_demo
 
 robot:
-  id: vla_action_decision_demo
-  display_name: VLA Action Decision Service desktop demo
+  id: vla_action_verify_demo
+  display_name: VLA Action Verify Service desktop demo
   family: demo
   root_part: base
   components:
@@ -16,6 +16,6 @@ robot:
 description:
   summary: Desktop-only robot model for RoboNix Service integration tests.
   can_do:
-    - Register and invoke the non-executable mock action-decision capability.
+    - Register and invoke the non-executable mock action-verify capability.
   cannot_do:
     - Run model inference or control physical robot hardware.
